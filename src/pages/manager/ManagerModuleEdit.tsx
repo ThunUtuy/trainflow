@@ -48,6 +48,23 @@ const ManagerModuleEdit = () => {
     toast({ title: "Image uploaded!" });
   };
 
+  const handleVideoUpload = async (pageId: string, file: File) => {
+    setUploading(pageId);
+    const ext = file.name.split(".").pop();
+    const filePath = `${id}/${pageId}.${ext}`;
+    const { error } = await supabase.storage.from("module-videos").upload(filePath, file, { upsert: true });
+    if (error) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      setUploading(null);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("module-videos").getPublicUrl(filePath);
+    const page = pages.find((p) => p.id === pageId);
+    await updatePage(pageId, "content", { ...page?.content, url: urlData.publicUrl });
+    setUploading(null);
+    toast({ title: "Video uploaded!" });
+  };
+
   const fetchData = async () => {
     if (!id) return;
     const [modRes, pagesRes] = await Promise.all([
@@ -215,11 +232,32 @@ const ManagerModuleEdit = () => {
                   onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
                   rows={2}
                 />
-                <Input
-                  placeholder="Video embed URL"
-                  value={page.content?.url || ""}
-                  onChange={(e) => updatePage(page.id, "content", { ...page.content, url: e.target.value })}
-                />
+                {page.content?.url && (
+                  <video src={page.content.url} controls className="rounded-lg w-full max-h-48" />
+                )}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                    disabled={uploading === page.id}
+                    onClick={() => document.getElementById(`upload-video-${page.id}`)?.click()}
+                  >
+                    <Upload className="h-4 w-4" />
+                    {uploading === page.id ? "Uploading..." : page.content?.url ? "Replace video" : "Upload video"}
+                  </Button>
+                  <input
+                    id={`upload-video-${page.id}`}
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleVideoUpload(page.id, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
               </div>
             )}
 
