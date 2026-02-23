@@ -34,11 +34,9 @@ const ManagerSetup = () => {
       return;
     }
 
-    // Link profile + create first invite code
-    await Promise.all([
-      supabase.from("profiles").update({ establishment_id: est.id }).eq("user_id", user.id),
-      supabase.from("invite_codes").insert({ establishment_id: est.id, code: inviteCode }),
-    ]);
+    // Link profile first, then create invite code (policy depends on profile)
+    await supabase.from("profiles").update({ establishment_id: est.id }).eq("user_id", user.id);
+    await supabase.from("invite_codes").insert({ establishment_id: est.id, code: inviteCode });
 
     setLoading(false);
     toast({ title: "Establishment created! 🎉" });
