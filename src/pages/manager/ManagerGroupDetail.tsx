@@ -12,30 +12,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface Module { id: string; title: string; assigned: boolean; }
 interface StaffMember { user_id: string; name: string; assigned: boolean; }
 
-const ManagerPlaylistDetail = () => {
-  const { id: playlistId } = useParams<{ id: string }>();
+const ManagerGroupDetail = () => {
+  const { id: groupId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { profile } = useAuthContext();
-  const [playlistName, setPlaylistName] = useState("");
+  const [groupName, setGroupName] = useState("");
   const [modules, setModules] = useState<Module[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!playlistId || !profile?.establishment_id) return;
+    if (!groupId || !profile?.establishment_id) return;
     const fetch = async () => {
       const estId = profile.establishment_id!;
 
       const [plRes, allModsRes, plModsRes, allStaffRes, plStaffRes] = await Promise.all([
-        supabase.from("playlists").select("name").eq("id", playlistId).single(),
+        supabase.from("playlists").select("name").eq("id", groupId).single(),
         supabase.from("modules").select("id, title").eq("establishment_id", estId).order("sort_order"),
-        supabase.from("playlist_modules").select("module_id").eq("playlist_id", playlistId),
+        supabase.from("playlist_modules").select("module_id").eq("playlist_id", groupId),
         supabase.from("profiles").select("user_id, name").eq("establishment_id", estId),
-        supabase.from("staff_playlist_assignments").select("user_id").eq("playlist_id", playlistId),
+        supabase.from("staff_playlist_assignments").select("user_id").eq("playlist_id", groupId),
       ]);
 
-      setPlaylistName(plRes.data?.name || "");
+      setGroupName(plRes.data?.name || "");
 
       const assignedModIds = new Set((plModsRes.data || []).map((r: any) => r.module_id));
       setModules((allModsRes.data || []).map((m: any) => ({
@@ -61,7 +61,7 @@ const ManagerPlaylistDetail = () => {
       setLoading(false);
     };
     fetch();
-  }, [playlistId, profile]);
+  }, [groupId, profile]);
 
   const toggleModule = (moduleId: string) => {
     setModules((prev) => prev.map((m) => m.id === moduleId ? { ...m, assigned: !m.assigned } : m));
@@ -72,29 +72,29 @@ const ManagerPlaylistDetail = () => {
   };
 
   const handleSave = async () => {
-    if (!playlistId) return;
+    if (!groupId) return;
     setSaving(true);
 
     // Sync modules
     const currentModIds = modules.filter((m) => m.assigned).map((m) => m.id);
-    await supabase.from("playlist_modules").delete().eq("playlist_id", playlistId);
+    await supabase.from("playlist_modules").delete().eq("playlist_id", groupId);
     if (currentModIds.length > 0) {
       await supabase.from("playlist_modules").insert(
-        currentModIds.map((mid, i) => ({ playlist_id: playlistId, module_id: mid, sort_order: i }))
+        currentModIds.map((mid, i) => ({ playlist_id: groupId, module_id: mid, sort_order: i }))
       );
     }
 
     // Sync staff assignments
     const currentStaffIds = staff.filter((s) => s.assigned).map((s) => s.user_id);
-    await supabase.from("staff_playlist_assignments").delete().eq("playlist_id", playlistId);
+    await supabase.from("staff_playlist_assignments").delete().eq("playlist_id", groupId);
     if (currentStaffIds.length > 0) {
       await supabase.from("staff_playlist_assignments").insert(
-        currentStaffIds.map((uid) => ({ playlist_id: playlistId, user_id: uid }))
+        currentStaffIds.map((uid) => ({ playlist_id: groupId, user_id: uid }))
       );
     }
 
     setSaving(false);
-    toast({ title: "Playlist saved ✓" });
+    toast({ title: "Group saved ✓" });
   };
 
   if (loading) {
@@ -103,11 +103,11 @@ const ManagerPlaylistDetail = () => {
 
   return (
     <div className="min-h-screen px-5 pt-6 pb-10">
-      <button onClick={() => navigate("/manager/playlists")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-3">
-        <ArrowLeft className="h-4 w-4" /> Back to playlists
+      <button onClick={() => navigate("/manager/groups")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-3">
+        <ArrowLeft className="h-4 w-4" /> Back to groups
       </button>
 
-      <h1 className="text-2xl font-bold mb-1">{playlistName}</h1>
+      <h1 className="text-2xl font-bold mb-1">{groupName}</h1>
       <p className="text-sm text-muted-foreground mb-4">Select modules and assign staff</p>
 
       <Tabs defaultValue="modules">
@@ -164,11 +164,11 @@ const ManagerPlaylistDetail = () => {
 
       <div className="mt-6">
         <Button className="w-full" onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save playlist"}
+          {saving ? "Saving..." : "Save group"}
         </Button>
       </div>
     </div>
   );
 };
 
-export default ManagerPlaylistDetail;
+export default ManagerGroupDetail;
