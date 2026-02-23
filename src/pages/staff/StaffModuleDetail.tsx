@@ -37,12 +37,20 @@ const StaffModuleDetail = () => {
       setHasQuiz((quizRes.data?.length ?? 0) > 0);
       setLoading(false);
 
-      // Mark as in_progress
+      // Mark as in_progress only if not already completed
       if (user) {
-        await supabase.from("staff_module_progress").upsert(
-          { user_id: user.id, module_id: id, status: "in_progress" as any, updated_at: new Date().toISOString() },
-          { onConflict: "user_id,module_id" }
-        );
+        const { data: existing } = await supabase
+          .from("staff_module_progress")
+          .select("status")
+          .eq("user_id", user.id)
+          .eq("module_id", id)
+          .maybeSingle();
+        if (!existing || existing.status !== "completed") {
+          await supabase.from("staff_module_progress").upsert(
+            { user_id: user.id, module_id: id, status: "in_progress" as any, updated_at: new Date().toISOString() },
+            { onConflict: "user_id,module_id" }
+          );
+        }
       }
     };
     fetch();
