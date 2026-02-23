@@ -84,23 +84,25 @@ const StaffQuiz = () => {
       setScore(correct);
       setSubmitted(true);
 
-      // Save attempt
+      // Save attempt and mark completed
       if (user && quizId) {
-        supabase.from("staff_quiz_attempts").insert({
-          user_id: user.id,
-          quiz_id: quizId,
-          score: correct,
-          total: questions.length,
-          answers: newAnswers,
-        }).then(() => {
+        const saveResults = async () => {
+          await supabase.from("staff_quiz_attempts").insert({
+            user_id: user.id,
+            quiz_id: quizId,
+            score: correct,
+            total: questions.length,
+            answers: newAnswers,
+          });
           // Mark module completed if passed (≥70%)
           if (correct / questions.length >= 0.7 && id) {
-            supabase.from("staff_module_progress").upsert(
+            await supabase.from("staff_module_progress").upsert(
               { user_id: user.id, module_id: id, status: "completed" as any, updated_at: new Date().toISOString() },
               { onConflict: "user_id,module_id" }
             );
           }
-        });
+        };
+        saveResults();
       }
     }
   };
