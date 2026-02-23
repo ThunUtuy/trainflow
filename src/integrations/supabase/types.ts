@@ -307,6 +307,35 @@ export type Database = {
           },
         ]
       }
+      staff_module_assignments: {
+        Row: {
+          assigned_at: string
+          id: string
+          module_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          id?: string
+          module_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          id?: string
+          module_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_module_assignments_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_module_progress: {
         Row: {
           id: string

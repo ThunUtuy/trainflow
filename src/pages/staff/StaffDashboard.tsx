@@ -29,23 +29,28 @@ const StaffDashboard = () => {
       return;
     }
     const fetchData = async () => {
-      // Get modules assigned to this staff via playlists
-      const { data: assignments } = await supabase
-        .from("staff_playlist_assignments")
-        .select("playlist_id")
-        .eq("user_id", user.id);
+      // Get modules from groups
+      const [groupAssignRes, individualAssignRes] = await Promise.all([
+        supabase.from("staff_playlist_assignments").select("playlist_id").eq("user_id", user.id),
+        supabase.from("staff_module_assignments").select("module_id").eq("user_id", user.id),
+      ]);
 
-      let assignedModuleIds: string[] = [];
-      if (assignments && assignments.length > 0) {
-        const playlistIds = assignments.map((a: any) => a.playlist_id);
+      const assignedModuleIds = new Set<string>();
+
+      // Modules from groups
+      if (groupAssignRes.data && groupAssignRes.data.length > 0) {
+        const playlistIds = groupAssignRes.data.map((a: any) => a.playlist_id);
         const { data: plMods } = await supabase
           .from("playlist_modules")
           .select("module_id")
           .in("playlist_id", playlistIds);
-        assignedModuleIds = [...new Set((plMods || []).map((pm: any) => pm.module_id))];
+        (plMods || []).forEach((pm: any) => assignedModuleIds.add(pm.module_id));
       }
 
-      if (assignedModuleIds.length === 0) {
+      // Individual module assignments
+      (individualAssignRes.data || []).forEach((r: any) => assignedModuleIds.add(r.module_id));
+
+      if (assignedModuleIds.size === 0) {
         setModules([]);
         setProgress({});
         setLoading(false);
@@ -53,7 +58,7 @@ const StaffDashboard = () => {
       }
 
       const [modRes, progRes] = await Promise.all([
-        supabase.from("modules").select("id, title, description").in("id", assignedModuleIds).order("sort_order"),
+        supabase.from("modules").select("id, title, description").in("id", Array.from(assignedModuleIds)).order("sort_order"),
         supabase.from("staff_module_progress").select("module_id, status").eq("user_id", user.id),
       ]);
       setModules((modRes.data as Module[]) || []);
