@@ -30,9 +30,25 @@ const AssignRole = () => {
   const assignRole = async (selectedRole: "manager" | "staff") => {
     if (!user) return;
     setLoading(true);
-    const { error } = await supabase.from("user_roles").upsert({ user_id: user.id, role: selectedRole }, { onConflict: "user_id,role" });
+    
+    // Check if role already exists
+    const { data: existing } = await supabase
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    
+    if (existing) {
+      // Role already set, just refetch and redirect
+      refetch();
+      setLoading(false);
+      return;
+    }
+    
+    const { error } = await supabase.from("user_roles").insert({ user_id: user.id, role: selectedRole });
     setLoading(false);
     if (error) {
+      console.error("Role assignment error:", error);
       toast({ title: "Failed to set role", variant: "destructive" });
       return;
     }
