@@ -29,8 +29,31 @@ const StaffDashboard = () => {
       return;
     }
     const fetchData = async () => {
+      // Get modules assigned to this staff via playlists
+      const { data: assignments } = await supabase
+        .from("staff_playlist_assignments")
+        .select("playlist_id")
+        .eq("user_id", user.id);
+
+      let assignedModuleIds: string[] = [];
+      if (assignments && assignments.length > 0) {
+        const playlistIds = assignments.map((a: any) => a.playlist_id);
+        const { data: plMods } = await supabase
+          .from("playlist_modules")
+          .select("module_id")
+          .in("playlist_id", playlistIds);
+        assignedModuleIds = [...new Set((plMods || []).map((pm: any) => pm.module_id))];
+      }
+
+      if (assignedModuleIds.length === 0) {
+        setModules([]);
+        setProgress({});
+        setLoading(false);
+        return;
+      }
+
       const [modRes, progRes] = await Promise.all([
-        supabase.from("modules").select("id, title, description").eq("establishment_id", profile!.establishment_id!).order("sort_order"),
+        supabase.from("modules").select("id, title, description").in("id", assignedModuleIds).order("sort_order"),
         supabase.from("staff_module_progress").select("module_id, status").eq("user_id", user.id),
       ]);
       setModules((modRes.data as Module[]) || []);
@@ -86,7 +109,7 @@ const StaffDashboard = () => {
       <section className="px-5">
         <h2 className="mb-3 text-lg font-semibold">Training modules</h2>
         {modules.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">No modules assigned yet.</p>
+          <p className="text-center text-muted-foreground py-8">No modules assigned to you yet. Ask your manager!</p>
         ) : (
           <div className="grid gap-3">
             {modules.map((mod) => {

@@ -23,6 +23,8 @@ import ManagerModules from "./pages/manager/ManagerModules";
 import ManagerCreateModule from "./pages/manager/ManagerCreateModule";
 import ManagerModuleEdit from "./pages/manager/ManagerModuleEdit";
 import ManagerInvite from "./pages/manager/ManagerInvite";
+import ManagerPlaylists from "./pages/manager/ManagerPlaylists";
+import ManagerPlaylistDetail from "./pages/manager/ManagerPlaylistDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +64,8 @@ function AppRoutes() {
       <Route path="/manager/modules" element={<RoleGuard role="manager"><ManagerModules /></RoleGuard>} />
       <Route path="/manager/modules/create" element={<RoleGuard role="manager"><ManagerCreateModule /></RoleGuard>} />
       <Route path="/manager/modules/:id/edit" element={<RoleGuard role="manager"><ManagerModuleEdit /></RoleGuard>} />
+      <Route path="/manager/playlists" element={<RoleGuard role="manager"><ManagerPlaylists /></RoleGuard>} />
+      <Route path="/manager/playlists/:id" element={<RoleGuard role="manager"><ManagerPlaylistDetail /></RoleGuard>} />
       <Route path="/manager/invite" element={<RoleGuard role="manager"><ManagerInvite /></RoleGuard>} />
 
       <Route path="*" element={<NotFound />} />

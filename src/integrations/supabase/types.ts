@@ -146,6 +146,71 @@ export type Database = {
           },
         ]
       }
+      playlist_modules: {
+        Row: {
+          id: string
+          module_id: string
+          playlist_id: string
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          module_id: string
+          playlist_id: string
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          module_id?: string
+          playlist_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playlist_modules_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlists: {
+        Row: {
+          created_at: string
+          establishment_id: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          establishment_id: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          establishment_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlists_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -270,6 +335,35 @@ export type Database = {
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_playlist_assignments: {
+        Row: {
+          assigned_at: string
+          id: string
+          playlist_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          id?: string
+          playlist_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          id?: string
+          playlist_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_playlist_assignments_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
             referencedColumns: ["id"]
           },
         ]
