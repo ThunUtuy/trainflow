@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { Home, BookOpen, Users, Settings, FolderOpen } from "lucide-react";
+import { BookOpen, Users, Settings, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
@@ -18,7 +18,6 @@ export function BottomNav() {
         { icon: Settings, label: "Settings", path: "/manager/invite" },
       ]
     : [
-        { icon: Home, label: "Home", path: "/staff/dashboard" },
         { icon: BookOpen, label: "Modules", path: "/staff/dashboard" },
       ];
 
