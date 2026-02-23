@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckSquare, Play } from "lucide-react";
+import { ArrowLeft, Play } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
@@ -84,11 +85,15 @@ const StaffModuleDetail = () => {
         );
       case "checklist":
         return (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {(page.content?.items || []).map((item: string, i: number) => (
-              <li key={i} className="flex items-center gap-2">
-                <CheckSquare className="h-4 w-4 text-primary" />
-                <span className="text-sm">{item}</span>
+              <li key={i} className="flex items-start gap-3">
+                <Checkbox
+                  id={`${page.id}-${i}`}
+                  className="mt-0.5"
+                  onCheckedChange={() => {}}
+                />
+                <label htmlFor={`${page.id}-${i}`} className="text-sm cursor-pointer select-none">{item}</label>
               </li>
             ))}
           </ul>
