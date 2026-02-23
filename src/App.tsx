@@ -41,7 +41,7 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/" element={user ? (role ? <Navigate to={`/${role === "manager" ? "manager/team" : "staff/dashboard"}`} replace /> : <Navigate to="/select-role" replace />) : <Welcome />} />
+      <Route path="/" element={user ? (role ? <Navigate to={`/${role === "manager" ? "manager/team" : "staff/dashboard"}`} replace /> : <Navigate to="/assign-role" replace />) : <Welcome />} />
       <Route path="/select-role" element={<SelectRole />} />
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/signup" element={user ? <Navigate to="/" replace /> : <Signup />} />
