@@ -77,9 +77,13 @@ const StaffModuleDetail = () => {
           <div className="space-y-2">
             {page.content?.text && <p className="text-sm">{page.content.text}</p>}
             {page.content?.url && (
-              <div className="aspect-video rounded-lg overflow-hidden bg-muted">
-                <iframe src={page.content.url} className="h-full w-full" allowFullScreen />
-              </div>
+              page.content.url.includes("module-videos") ? (
+                <video src={page.content.url} controls className="rounded-lg w-full" />
+              ) : (
+                <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+                  <iframe src={page.content.url} className="h-full w-full" allowFullScreen />
+                </div>
+              )
             )}
           </div>
         );
