@@ -8,24 +8,24 @@ import { BottomNav } from "@/components/BottomNav";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { Plus, ListMusic, Trash2 } from "lucide-react";
+import { Plus, FolderOpen, Trash2 } from "lucide-react";
 
-interface Playlist {
+interface Group {
   id: string;
   name: string;
   module_count: number;
   staff_count: number;
 }
 
-const ManagerPlaylists = () => {
+const ManagerGroups = () => {
   const navigate = useNavigate();
   const { profile } = useAuthContext();
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
 
-  const fetchPlaylists = async () => {
+  const fetchGroups = async () => {
     if (!profile?.establishment_id) return;
     const { data } = await supabase
       .from("playlists")
@@ -33,9 +33,9 @@ const ManagerPlaylists = () => {
       .eq("establishment_id", profile.establishment_id)
       .order("created_at");
 
-    if (!data) { setPlaylists([]); setLoading(false); return; }
+    if (!data) { setGroups([]); setLoading(false); return; }
 
-    const enriched: Playlist[] = await Promise.all(
+    const enriched: Group[] = await Promise.all(
       data.map(async (p) => {
         const [modRes, staffRes] = await Promise.all([
           supabase.from("playlist_modules").select("id", { count: "exact", head: true }).eq("playlist_id", p.id),
@@ -45,11 +45,11 @@ const ManagerPlaylists = () => {
       })
     );
 
-    setPlaylists(enriched);
+    setGroups(enriched);
     setLoading(false);
   };
 
-  useEffect(() => { fetchPlaylists(); }, [profile]);
+  useEffect(() => { fetchGroups(); }, [profile]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,16 +60,16 @@ const ManagerPlaylists = () => {
       establishment_id: profile.establishment_id,
     });
     setCreating(false);
-    if (error) { toast({ title: "Failed to create playlist", variant: "destructive" }); return; }
+    if (error) { toast({ title: "Failed to create group", variant: "destructive" }); return; }
     setNewName("");
-    toast({ title: "Playlist created" });
-    fetchPlaylists();
+    toast({ title: "Group created" });
+    fetchGroups();
   };
 
   const handleDelete = async (id: string) => {
     await supabase.from("playlists").delete().eq("id", id);
-    toast({ title: "Playlist deleted" });
-    fetchPlaylists();
+    toast({ title: "Group deleted" });
+    fetchGroups();
   };
 
   if (loading) {
@@ -79,13 +79,13 @@ const ManagerPlaylists = () => {
   return (
     <div className="min-h-screen pb-20">
       <header className="px-5 pt-6 pb-2">
-        <h1 className="text-xl font-bold">Playlists</h1>
-        <p className="text-sm text-muted-foreground">Group modules into training playlists</p>
+        <h1 className="text-xl font-bold">Groups</h1>
+        <p className="text-sm text-muted-foreground">Group modules into training groups for your staff</p>
       </header>
 
       <form onSubmit={handleCreate} className="flex gap-2 px-5 pt-3">
         <Input
-          placeholder="New playlist name..."
+          placeholder="New group name..."
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           required
@@ -96,39 +96,39 @@ const ManagerPlaylists = () => {
       </form>
 
       <section className="px-5 pt-4">
-        {playlists.length === 0 ? (
+        {groups.length === 0 ? (
           <div className="text-center py-12 space-y-3">
-            <ListMusic className="mx-auto h-10 w-10 text-muted-foreground" />
-            <p className="text-muted-foreground">No playlists yet. Create one above!</p>
+            <FolderOpen className="mx-auto h-10 w-10 text-muted-foreground" />
+            <p className="text-muted-foreground">No groups yet. Create one above!</p>
           </div>
         ) : (
           <div className="grid gap-3">
-            {playlists.map((pl) => (
+            {groups.map((g) => (
               <motion.div
-                key={pl.id}
+                key={g.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center justify-between rounded-xl border bg-card p-4"
               >
                 <button
-                  onClick={() => navigate(`/manager/playlists/${pl.id}`)}
+                  onClick={() => navigate(`/manager/groups/${g.id}`)}
                   className="flex items-center gap-3 text-left flex-1 min-w-0"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <ListMusic className="h-5 w-5 text-primary" />
+                    <FolderOpen className="h-5 w-5 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium truncate">{pl.name}</p>
+                    <p className="font-medium truncate">{g.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {pl.module_count} module{pl.module_count !== 1 ? "s" : ""} · {pl.staff_count} staff
+                      {g.module_count} module{g.module_count !== 1 ? "s" : ""} · {g.staff_count} staff
                     </p>
                   </div>
                 </button>
                 <ConfirmDeleteDialog
                   trigger={<button className="ml-2 p-2 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>}
-                  title="Delete playlist?"
-                  description="This will remove the playlist and unassign it from all staff."
-                  onConfirm={() => handleDelete(pl.id)}
+                  title="Delete group?"
+                  description="This will remove the group and unassign it from all staff."
+                  onConfirm={() => handleDelete(g.id)}
                 />
               </motion.div>
             ))}
@@ -140,4 +140,4 @@ const ManagerPlaylists = () => {
   );
 };
 
-export default ManagerPlaylists;
+export default ManagerGroups;
