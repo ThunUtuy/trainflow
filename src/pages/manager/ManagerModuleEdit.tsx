@@ -9,7 +9,7 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Trash2, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon } from "lucide-react";
 
 type PageType = "text" | "image" | "video" | "checklist";
 
@@ -29,6 +29,24 @@ const ManagerModuleEdit = () => {
   const [pages, setPages] = useState<ModulePage[]>([]);
   const [loading, setLoading] = useState(true);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
+
+  const handleImageUpload = async (pageId: string, file: File) => {
+    setUploading(pageId);
+    const ext = file.name.split(".").pop();
+    const filePath = `${id}/${pageId}.${ext}`;
+    const { error } = await supabase.storage.from("module-images").upload(filePath, file, { upsert: true });
+    if (error) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      setUploading(null);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("module-images").getPublicUrl(filePath);
+    const page = pages.find((p) => p.id === pageId);
+    await updatePage(pageId, "content", { ...page?.content, url: urlData.publicUrl });
+    setUploading(null);
+    toast({ title: "Image uploaded!" });
+  };
 
   const fetchData = async () => {
     if (!id) return;
@@ -152,7 +170,44 @@ const ManagerModuleEdit = () => {
               />
             )}
 
-            {(page.type === "image" || page.type === "video") && (
+            {page.type === "image" && (
+              <div className="space-y-2">
+                <Textarea
+                  placeholder="Description text..."
+                  value={page.content?.text || ""}
+                  onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
+                  rows={2}
+                />
+                {page.content?.url && (
+                  <img src={page.content.url} alt={page.title} className="rounded-lg w-full max-h-48 object-cover" />
+                )}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                    disabled={uploading === page.id}
+                    onClick={() => document.getElementById(`upload-${page.id}`)?.click()}
+                  >
+                    <Upload className="h-4 w-4" />
+                    {uploading === page.id ? "Uploading..." : page.content?.url ? "Replace image" : "Upload image"}
+                  </Button>
+                  <input
+                    id={`upload-${page.id}`}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload(page.id, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {page.type === "video" && (
               <div className="space-y-2">
                 <Textarea
                   placeholder="Description text..."
@@ -161,7 +216,7 @@ const ManagerModuleEdit = () => {
                   rows={2}
                 />
                 <Input
-                  placeholder={page.type === "image" ? "Image URL" : "Video embed URL"}
+                  placeholder="Video embed URL"
                   value={page.content?.url || ""}
                   onChange={(e) => updatePage(page.id, "content", { ...page.content, url: e.target.value })}
                 />
