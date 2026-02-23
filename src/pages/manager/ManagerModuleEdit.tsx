@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Trash2, GripVertical } from "lucide-react";
@@ -28,6 +28,7 @@ const ManagerModuleEdit = () => {
   const [moduleDesc, setModuleDesc] = useState("");
   const [pages, setPages] = useState<ModulePage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
 
   const fetchData = async () => {
     if (!id) return;
@@ -95,18 +96,24 @@ const ManagerModuleEdit = () => {
 
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Pages</h2>
-        <Select onValueChange={addPage}>
-          <SelectTrigger className="w-auto gap-1">
-            <Plus className="h-4 w-4" />
-            <SelectValue placeholder="Add page" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="text">Text</SelectItem>
-            <SelectItem value="image">Image</SelectItem>
-            <SelectItem value="video">Video</SelectItem>
-            <SelectItem value="checklist">Checklist</SelectItem>
-          </SelectContent>
-        </Select>
+        <Popover open={addMenuOpen} onOpenChange={setAddMenuOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-1">
+              <Plus className="h-4 w-4" /> Add page
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-40 p-1" align="end">
+            {["text", "image", "video", "checklist"].map((type) => (
+              <button
+                key={type}
+                className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent capitalize"
+                onClick={() => { addPage(type); setAddMenuOpen(false); }}
+              >
+                {type}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="space-y-4">
