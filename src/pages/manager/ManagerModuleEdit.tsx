@@ -31,7 +31,13 @@ const ManagerModuleEdit = () => {
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
 
+  const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
+
   const handleImageUpload = async (pageId: string, file: File) => {
+    if (file.size > MAX_FILE_SIZE) {
+      toast({ title: "File too large", description: "Maximum file size is 200MB.", variant: "destructive" });
+      return;
+    }
     setUploading(pageId);
     const ext = file.name.split(".").pop();
     const filePath = `${id}/${pageId}.${ext}`;
@@ -49,6 +55,10 @@ const ManagerModuleEdit = () => {
   };
 
   const handleVideoUpload = async (pageId: string, file: File) => {
+    if (file.size > MAX_FILE_SIZE) {
+      toast({ title: "File too large", description: "Maximum file size is 200MB.", variant: "destructive" });
+      return;
+    }
     setUploading(pageId);
     const ext = file.name.split(".").pop();
     const filePath = `${id}/${pageId}.${ext}`;
