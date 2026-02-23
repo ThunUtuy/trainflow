@@ -30,7 +30,7 @@ const AssignRole = () => {
   const assignRole = async (selectedRole: "manager" | "staff") => {
     if (!user) return;
     setLoading(true);
-    const { error } = await supabase.from("user_roles").insert({ user_id: user.id, role: selectedRole });
+    const { error } = await supabase.from("user_roles").upsert({ user_id: user.id, role: selectedRole }, { onConflict: "user_id,role" });
     setLoading(false);
     if (error) {
       toast({ title: "Failed to set role", variant: "destructive" });
