@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { BottomNav } from "@/components/BottomNav";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { toast } from "@/hooks/use-toast";
@@ -22,8 +21,6 @@ const ManagerGroups = () => {
   const { profile } = useAuthContext();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState("");
 
   const fetchGroups = async () => {
     if (!profile?.establishment_id) return;
@@ -51,21 +48,6 @@ const ManagerGroups = () => {
 
   useEffect(() => { fetchGroups(); }, [profile]);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newName.trim() || !profile?.establishment_id) return;
-    setCreating(true);
-    const { error } = await supabase.from("playlists").insert({
-      name: newName.trim(),
-      establishment_id: profile.establishment_id,
-    });
-    setCreating(false);
-    if (error) { toast({ title: "Failed to create role", variant: "destructive" }); return; }
-    setNewName("");
-    toast({ title: "Role created" });
-    fetchGroups();
-  };
-
   const handleDelete = async (id: string) => {
     await supabase.from("playlists").delete().eq("id", id);
     toast({ title: "Role deleted" });
@@ -78,22 +60,15 @@ const ManagerGroups = () => {
 
   return (
     <div className="min-h-screen pb-20">
-      <header className="px-5 pt-6 pb-2">
-        <h1 className="text-xl font-bold">Roles</h1>
-        <p className="text-sm text-muted-foreground">Group modules into training roles for your staff</p>
-      </header>
-
-      <form onSubmit={handleCreate} className="flex gap-2 px-5 pt-3">
-        <Input
-          placeholder="New role name..."
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          required
-        />
-        <Button type="submit" size="sm" disabled={creating}>
-          <Plus className="mr-1 h-4 w-4" /> Add
+      <header className="flex items-center justify-between px-5 pt-6 pb-2">
+        <div>
+          <h1 className="text-xl font-bold">Roles</h1>
+          <p className="text-sm text-muted-foreground">Group modules into training roles for your staff</p>
+        </div>
+        <Button size="sm" onClick={() => navigate("/manager/groups/create")}>
+          <Plus className="mr-1 h-4 w-4" /> New
         </Button>
-      </form>
+      </header>
 
       <section className="px-5 pt-4">
         {groups.length === 0 ? (
