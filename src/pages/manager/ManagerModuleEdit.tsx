@@ -24,6 +24,9 @@ interface ModulePage {
 const ManagerModuleEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromRole = searchParams.get("from") === "role";
+  const roleId = searchParams.get("roleId");
   const [moduleTitle, setModuleTitle] = useState("");
   const [moduleDesc, setModuleDesc] = useState("");
   const [pages, setPages] = useState<ModulePage[]>([]);

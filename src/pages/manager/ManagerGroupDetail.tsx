@@ -168,7 +168,6 @@ const ManagerGroupDetail = () => {
                       </div>
                       <span className="font-medium truncate">{mod.title}</span>
                     </button>
-                    </div>
                     <button
                       onClick={() => removeModule(mod.id)}
                       className="ml-2 p-2 text-muted-foreground hover:text-destructive transition-colors"
