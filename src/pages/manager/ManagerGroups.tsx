@@ -62,7 +62,7 @@ const ManagerGroups = () => {
     setCreating(false);
     if (error) { toast({ title: "Failed to create role", variant: "destructive" }); return; }
     setNewName("");
-    toast({ title: "Group created" });
+    toast({ title: "Role created" });
     fetchGroups();
   };
 
