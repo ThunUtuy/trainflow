@@ -104,7 +104,7 @@ const ManagerGroupDetail = () => {
   return (
     <div className="min-h-screen px-5 pt-6 pb-10">
       <button onClick={() => navigate("/manager/groups")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-3">
-        <ArrowLeft className="h-4 w-4" /> Back to groups
+        <ArrowLeft className="h-4 w-4" /> Back to roles
       </button>
 
       <h1 className="text-2xl font-bold mb-1">{groupName}</h1>
