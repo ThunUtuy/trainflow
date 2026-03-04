@@ -68,7 +68,7 @@ const ManagerGroups = () => {
 
   const handleDelete = async (id: string) => {
     await supabase.from("playlists").delete().eq("id", id);
-    toast({ title: "Group deleted" });
+    toast({ title: "Role deleted" });
     fetchGroups();
   };
 
