@@ -49,21 +49,6 @@ const ManagerGroups = () => {
 
   useEffect(() => { fetchGroups(); }, [profile]);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newName.trim() || !profile?.establishment_id) return;
-    setCreating(true);
-    const { error } = await supabase.from("playlists").insert({
-      name: newName.trim(),
-      establishment_id: profile.establishment_id,
-    });
-    setCreating(false);
-    if (error) { toast({ title: "Failed to create role", variant: "destructive" }); return; }
-    setNewName("");
-    toast({ title: "Role created" });
-    fetchGroups();
-  };
-
   const handleDelete = async (id: string) => {
     await supabase.from("playlists").delete().eq("id", id);
     toast({ title: "Role deleted" });
