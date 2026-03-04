@@ -60,7 +60,7 @@ const ManagerGroups = () => {
       establishment_id: profile.establishment_id,
     });
     setCreating(false);
-    if (error) { toast({ title: "Failed to create group", variant: "destructive" }); return; }
+    if (error) { toast({ title: "Failed to create role", variant: "destructive" }); return; }
     setNewName("");
     toast({ title: "Group created" });
     fetchGroups();
