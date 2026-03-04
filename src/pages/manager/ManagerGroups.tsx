@@ -22,8 +22,6 @@ const ManagerGroups = () => {
   const { profile } = useAuthContext();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState("");
 
   const fetchGroups = async () => {
     if (!profile?.establishment_id) return;
