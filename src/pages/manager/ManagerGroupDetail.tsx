@@ -5,11 +5,18 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, Users } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, BookOpen, Users, Trash2, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
-interface Module { id: string; title: string; assigned: boolean; }
+interface Module { id: string; title: string; }
 interface StaffMember { user_id: string; name: string; assigned: boolean; }
 
 const ManagerGroupDetail = () => {
@@ -17,14 +24,17 @@ const ManagerGroupDetail = () => {
   const navigate = useNavigate();
   const { profile } = useAuthContext();
   const [groupName, setGroupName] = useState("");
-  const [modules, setModules] = useState<Module[]>([]);
+  const [includedModules, setIncludedModules] = useState<Module[]>([]);
+  const [allModules, setAllModules] = useState<Module[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [selectedToAdd, setSelectedToAdd] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!groupId || !profile?.establishment_id) return;
-    const fetch = async () => {
+    const fetchData = async () => {
       const estId = profile.establishment_id!;
 
       const [plRes, allModsRes, plModsRes, allStaffRes, plStaffRes] = await Promise.all([
@@ -37,14 +47,13 @@ const ManagerGroupDetail = () => {
 
       setGroupName(plRes.data?.name || "");
 
+      const allMods = (allModsRes.data || []).map((m: any) => ({ id: m.id, title: m.title }));
+      setAllModules(allMods);
+
       const assignedModIds = new Set((plModsRes.data || []).map((r: any) => r.module_id));
-      setModules((allModsRes.data || []).map((m: any) => ({
-        id: m.id, title: m.title, assigned: assignedModIds.has(m.id),
-      })));
+      setIncludedModules(allMods.filter((m) => assignedModIds.has(m.id)));
 
       const assignedStaffIds = new Set((plStaffRes.data || []).map((r: any) => r.user_id));
-      
-      // Filter to only staff role users
       const staffProfiles = allStaffRes.data || [];
       const staffWithRoles: StaffMember[] = [];
       for (const sp of staffProfiles) {
@@ -60,23 +69,44 @@ const ManagerGroupDetail = () => {
       setStaff(staffWithRoles);
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, [groupId, profile]);
 
-  const toggleModule = (moduleId: string) => {
-    setModules((prev) => prev.map((m) => m.id === moduleId ? { ...m, assigned: !m.assigned } : m));
+  const removeModule = (moduleId: string) => {
+    setIncludedModules((prev) => prev.filter((m) => m.id !== moduleId));
+  };
+
+  const toggleAddSelection = (moduleId: string) => {
+    setSelectedToAdd((prev) => {
+      const next = new Set(prev);
+      if (next.has(moduleId)) next.delete(moduleId);
+      else next.add(moduleId);
+      return next;
+    });
+  };
+
+  const confirmAddModules = () => {
+    const newMods = allModules.filter(
+      (m) => selectedToAdd.has(m.id) && !includedModules.some((inc) => inc.id === m.id)
+    );
+    setIncludedModules((prev) => [...prev, ...newMods]);
+    setSelectedToAdd(new Set());
+    setSheetOpen(false);
   };
 
   const toggleStaff = (userId: string) => {
     setStaff((prev) => prev.map((s) => s.user_id === userId ? { ...s, assigned: !s.assigned } : s));
   };
 
+  const availableModules = allModules.filter(
+    (m) => !includedModules.some((inc) => inc.id === m.id)
+  );
+
   const handleSave = async () => {
     if (!groupId) return;
     setSaving(true);
 
-    // Sync modules
-    const currentModIds = modules.filter((m) => m.assigned).map((m) => m.id);
+    const currentModIds = includedModules.map((m) => m.id);
     await supabase.from("playlist_modules").delete().eq("playlist_id", groupId);
     if (currentModIds.length > 0) {
       await supabase.from("playlist_modules").insert(
@@ -84,7 +114,6 @@ const ManagerGroupDetail = () => {
       );
     }
 
-    // Sync staff assignments
     const currentStaffIds = staff.filter((s) => s.assigned).map((s) => s.user_id);
     await supabase.from("staff_playlist_assignments").delete().eq("playlist_id", groupId);
     if (currentStaffIds.length > 0) {
@@ -108,32 +137,85 @@ const ManagerGroupDetail = () => {
       </button>
 
       <h1 className="text-2xl font-bold mb-1">{groupName}</h1>
-      <p className="text-sm text-muted-foreground mb-4">Select modules and assign staff</p>
+      <p className="text-sm text-muted-foreground mb-4">Manage modules and staff for this role</p>
 
       <Tabs defaultValue="modules">
         <TabsList className="w-full mb-4">
-          <TabsTrigger value="modules" className="flex-1"><BookOpen className="mr-1.5 h-4 w-4" /> Modules</TabsTrigger>
+          <TabsTrigger value="modules" className="flex-1"><BookOpen className="mr-1.5 h-4 w-4" /> Modules ({includedModules.length})</TabsTrigger>
           <TabsTrigger value="staff" className="flex-1"><Users className="mr-1.5 h-4 w-4" /> Staff</TabsTrigger>
         </TabsList>
 
         <TabsContent value="modules">
-          {modules.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">No modules in your establishment yet.</p>
+          {includedModules.length === 0 ? (
+            <p className="text-center py-8 text-muted-foreground">No modules in this role yet.</p>
           ) : (
             <div className="grid gap-2">
-              {modules.map((mod) => (
-                <motion.label
-                  key={mod.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-3 rounded-xl border bg-card p-4 cursor-pointer hover:shadow-sm transition-shadow"
-                >
-                  <Checkbox checked={mod.assigned} onCheckedChange={() => toggleModule(mod.id)} />
-                  <span className="font-medium">{mod.title}</span>
-                </motion.label>
-              ))}
+              <AnimatePresence>
+                {includedModules.map((mod) => (
+                  <motion.div
+                    key={mod.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -40 }}
+                    className="flex items-center justify-between rounded-xl border bg-card p-4"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="font-medium truncate">{mod.title}</span>
+                    </div>
+                    <button
+                      onClick={() => removeModule(mod.id)}
+                      className="ml-2 p-2 text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           )}
+
+          <Sheet open={sheetOpen} onOpenChange={(open) => { setSheetOpen(open); if (!open) setSelectedToAdd(new Set()); }}>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="w-full mt-4" size="sm">
+                <Plus className="mr-1.5 h-4 w-4" /> Add modules
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="max-h-[70vh] overflow-y-auto rounded-t-2xl">
+              <SheetHeader>
+                <SheetTitle>Add modules to role</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4 grid gap-2">
+                {availableModules.length === 0 ? (
+                  <p className="text-center py-6 text-muted-foreground">All modules are already included.</p>
+                ) : (
+                  availableModules.map((mod) => (
+                    <label
+                      key={mod.id}
+                      className="flex items-center gap-3 rounded-xl border bg-card p-4 cursor-pointer hover:shadow-sm transition-shadow"
+                    >
+                      <Checkbox
+                        checked={selectedToAdd.has(mod.id)}
+                        onCheckedChange={() => toggleAddSelection(mod.id)}
+                      />
+                      <span className="font-medium">{mod.title}</span>
+                    </label>
+                  ))
+                )}
+              </div>
+              {availableModules.length > 0 && (
+                <Button
+                  className="w-full mt-4"
+                  onClick={confirmAddModules}
+                  disabled={selectedToAdd.size === 0}
+                >
+                  Add {selectedToAdd.size} module{selectedToAdd.size !== 1 ? "s" : ""}
+                </Button>
+              )}
+            </SheetContent>
+          </Sheet>
         </TabsContent>
 
         <TabsContent value="staff">
