@@ -60,15 +60,15 @@ const ManagerGroups = () => {
       establishment_id: profile.establishment_id,
     });
     setCreating(false);
-    if (error) { toast({ title: "Failed to create group", variant: "destructive" }); return; }
+    if (error) { toast({ title: "Failed to create role", variant: "destructive" }); return; }
     setNewName("");
-    toast({ title: "Group created" });
+    toast({ title: "Role created" });
     fetchGroups();
   };
 
   const handleDelete = async (id: string) => {
     await supabase.from("playlists").delete().eq("id", id);
-    toast({ title: "Group deleted" });
+    toast({ title: "Role deleted" });
     fetchGroups();
   };
 
@@ -79,13 +79,13 @@ const ManagerGroups = () => {
   return (
     <div className="min-h-screen pb-20">
       <header className="px-5 pt-6 pb-2">
-        <h1 className="text-xl font-bold">Groups</h1>
-        <p className="text-sm text-muted-foreground">Group modules into training groups for your staff</p>
+        <h1 className="text-xl font-bold">Roles</h1>
+        <p className="text-sm text-muted-foreground">Group modules into training roles for your staff</p>
       </header>
 
       <form onSubmit={handleCreate} className="flex gap-2 px-5 pt-3">
         <Input
-          placeholder="New group name..."
+          placeholder="New role name..."
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           required
@@ -99,7 +99,7 @@ const ManagerGroups = () => {
         {groups.length === 0 ? (
           <div className="text-center py-12 space-y-3">
             <FolderOpen className="mx-auto h-10 w-10 text-muted-foreground" />
-            <p className="text-muted-foreground">No groups yet. Create one above!</p>
+            <p className="text-muted-foreground">No roles yet. Create one above!</p>
           </div>
         ) : (
           <div className="grid gap-3">
@@ -126,8 +126,8 @@ const ManagerGroups = () => {
                 </button>
                 <ConfirmDeleteDialog
                   trigger={<button className="ml-2 p-2 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>}
-                  title="Delete group?"
-                  description="This will remove the group and unassign it from all staff."
+                  title="Delete role?"
+                  description="This will remove the role and unassign it from all staff."
                   onConfirm={() => handleDelete(g.id)}
                 />
               </motion.div>
