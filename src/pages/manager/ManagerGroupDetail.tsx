@@ -94,7 +94,7 @@ const ManagerGroupDetail = () => {
     }
 
     setSaving(false);
-    toast({ title: "Group saved ✓" });
+    toast({ title: "Role saved ✓" });
   };
 
   if (loading) {
