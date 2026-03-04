@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
-import { ArrowLeft, FileText } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, FileText, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { roleTemplates } from "@/data/roleTemplates";
 
@@ -132,27 +132,54 @@ const ManagerCreateRole = () => {
 
       <div className="grid gap-3 mb-6">
         {roleTemplates.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setSelected(t.key)}
-            className={cn(
-              "flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all",
-              selected === t.key
-                ? "border-primary bg-primary/5"
-                : "border-border bg-card hover:border-primary/50"
-            )}
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <t.icon className="h-5 w-5 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-medium">{t.title}</p>
-              <p className="text-xs text-muted-foreground">{t.description}</p>
-              <p className="text-xs text-primary/70 mt-1">
-                {t.modules.length} modules included
-              </p>
-            </div>
-          </button>
+          <div key={t.key}>
+            <button
+              onClick={() => setSelected(selected === t.key ? null : t.key)}
+              className={cn(
+                "flex w-full items-center gap-4 rounded-xl border-2 p-4 text-left transition-all",
+                selected === t.key
+                  ? "border-primary bg-primary/5 rounded-b-none"
+                  : "border-border bg-card hover:border-primary/50"
+              )}
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <t.icon className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium">{t.title}</p>
+                <p className="text-xs text-muted-foreground">{t.description}</p>
+                <p className="text-xs text-primary/70 mt-1">
+                  {t.modules.length} modules included
+                </p>
+              </div>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
+                  selected === t.key && "rotate-180"
+                )}
+              />
+            </button>
+            <AnimatePresence>
+              {selected === t.key && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden border-2 border-t-0 border-primary rounded-b-xl bg-primary/5"
+                >
+                  <ul className="px-4 py-3 space-y-1">
+                    {t.modules.map((m, i) => (
+                      <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                        {m.title}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         ))}
 
         <button
@@ -191,26 +218,6 @@ const ManagerCreateRole = () => {
               placeholder="e.g. Barista, Kitchen Porter"
             />
           </div>
-        </motion.div>
-      )}
-
-      {selected && selected !== "blank" && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mb-6 rounded-xl border bg-muted/30 p-4"
-        >
-          <p className="text-sm font-medium mb-2">Modules included:</p>
-          <ul className="space-y-1">
-            {roleTemplates
-              .find((t) => t.key === selected)
-              ?.modules.map((m, i) => (
-                <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                  {m.title}
-                </li>
-              ))}
-          </ul>
         </motion.div>
       )}
 
