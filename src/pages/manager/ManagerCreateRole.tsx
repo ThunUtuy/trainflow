@@ -176,6 +176,15 @@ const ManagerCreateRole = () => {
                       </li>
                     ))}
                   </ul>
+                  <div className="px-4 pb-4">
+                    <Button
+                      className="w-full"
+                      disabled={loading}
+                      onClick={handleCreate}
+                    >
+                      {loading ? "Creating..." : "Create role"}
+                    </Button>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -203,31 +212,33 @@ const ManagerCreateRole = () => {
         </button>
       </div>
 
-      {selected === "blank" && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          className="space-y-3 mb-6"
-        >
-          <div>
-            <Label htmlFor="name">Role name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Barista, Kitchen Porter"
-            />
-          </div>
-        </motion.div>
-      )}
-
-      <Button
-        className="w-full"
-        disabled={!selected || (selected === "blank" && !name.trim()) || loading}
-        onClick={handleCreate}
-      >
-        {loading ? "Creating..." : "Create role"}
-      </Button>
+      <AnimatePresence>
+        {selected === "blank" && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ height: 0, opacity: 0 }}
+            className="space-y-3 mb-6"
+          >
+            <div>
+              <Label htmlFor="name">Role name</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Barista, Kitchen Porter"
+              />
+            </div>
+            <Button
+              className="w-full"
+              disabled={!name.trim() || loading}
+              onClick={handleCreate}
+            >
+              {loading ? "Creating..." : "Create role"}
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
