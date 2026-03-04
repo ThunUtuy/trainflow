@@ -40,7 +40,7 @@ const ManagerGroups = () => {
           supabase.from("playlist_modules").select("id", { count: "exact", head: true }).eq("playlist_id", p.id),
           supabase.from("staff_playlist_assignments").select("id", { count: "exact", head: true }).eq("playlist_id", p.id),
         ]);
-        return { ...p, module_count: modRes.count || 0, staff_count: staffRes.count || 0 };
+        return { ...p, template_source: p.template_source || null, module_count: modRes.count || 0, staff_count: staffRes.count || 0 };
       })
     );
 
