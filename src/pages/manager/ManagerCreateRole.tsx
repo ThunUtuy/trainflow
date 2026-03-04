@@ -28,7 +28,7 @@ const ManagerCreateRole = () => {
     // Create the playlist (role)
     const { data: playlist, error } = await supabase
       .from("playlists")
-      .insert({ name: finalName, establishment_id: profile.establishment_id })
+      .insert({ name: finalName, establishment_id: profile.establishment_id, template_source: selected === "blank" ? null : selected })
       .select("id")
       .single();
 

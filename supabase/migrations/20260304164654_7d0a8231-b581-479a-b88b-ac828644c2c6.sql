@@ -1,0 +1,1 @@
+ALTER TABLE public.playlists ADD COLUMN template_source text DEFAULT NULL;

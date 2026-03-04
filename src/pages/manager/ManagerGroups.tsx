@@ -8,10 +8,12 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Plus, FolderOpen, Trash2 } from "lucide-react";
+import { roleTemplates } from "@/data/roleTemplates";
 
 interface Group {
   id: string;
   name: string;
+  template_source: string | null;
   module_count: number;
   staff_count: number;
 }
@@ -26,7 +28,7 @@ const ManagerGroups = () => {
     if (!profile?.establishment_id) return;
     const { data } = await supabase
       .from("playlists")
-      .select("id, name")
+      .select("id, name, template_source")
       .eq("establishment_id", profile.establishment_id)
       .order("created_at");
 
@@ -38,7 +40,7 @@ const ManagerGroups = () => {
           supabase.from("playlist_modules").select("id", { count: "exact", head: true }).eq("playlist_id", p.id),
           supabase.from("staff_playlist_assignments").select("id", { count: "exact", head: true }).eq("playlist_id", p.id),
         ]);
-        return { ...p, module_count: modRes.count || 0, staff_count: staffRes.count || 0 };
+        return { ...p, template_source: p.template_source || null, module_count: modRes.count || 0, staff_count: staffRes.count || 0 };
       })
     );
 
@@ -90,7 +92,11 @@ const ManagerGroups = () => {
                   className="flex items-center gap-3 text-left flex-1 min-w-0"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <FolderOpen className="h-5 w-5 text-primary" />
+                    {(() => {
+                      const template = roleTemplates.find(t => t.key === g.template_source);
+                      const Icon = template ? template.icon : FolderOpen;
+                      return <Icon className="h-5 w-5 text-primary" />;
+                    })()}
                   </div>
                   <div className="min-w-0">
                     <p className="font-medium truncate">{g.name}</p>
