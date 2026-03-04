@@ -66,6 +66,7 @@ function AppRoutes() {
       <Route path="/manager/modules/create" element={<RoleGuard role="manager"><ManagerCreateModule /></RoleGuard>} />
       <Route path="/manager/modules/:id/edit" element={<RoleGuard role="manager"><ManagerModuleEdit /></RoleGuard>} />
       <Route path="/manager/groups" element={<RoleGuard role="manager"><ManagerGroups /></RoleGuard>} />
+      <Route path="/manager/groups/create" element={<RoleGuard role="manager"><ManagerCreateRole /></RoleGuard>} />
       <Route path="/manager/groups/:id" element={<RoleGuard role="manager"><ManagerGroupDetail /></RoleGuard>} />
       <Route path="/manager/invite" element={<RoleGuard role="manager"><ManagerInvite /></RoleGuard>} />
 
