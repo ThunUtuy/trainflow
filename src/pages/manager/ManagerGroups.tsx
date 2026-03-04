@@ -8,6 +8,7 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Plus, FolderOpen, Trash2 } from "lucide-react";
+import { roleTemplates } from "@/data/roleTemplates";
 
 interface Group {
   id: string;
