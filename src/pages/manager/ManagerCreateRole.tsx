@@ -238,8 +238,6 @@ const ManagerCreateRole = () => {
             </Button>
           </motion.div>
         )}
-      </AnimatePresence>
-      </Button>
     </div>
   );
 };
