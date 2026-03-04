@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
-import { ArrowLeft, FileText } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, FileText, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { roleTemplates } from "@/data/roleTemplates";
 
