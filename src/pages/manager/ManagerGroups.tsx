@@ -92,7 +92,11 @@ const ManagerGroups = () => {
                   className="flex items-center gap-3 text-left flex-1 min-w-0"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <FolderOpen className="h-5 w-5 text-primary" />
+                    {(() => {
+                      const template = roleTemplates.find(t => t.key === g.template_source);
+                      const Icon = template ? template.icon : FolderOpen;
+                      return <Icon className="h-5 w-5 text-primary" />;
+                    })()}
                   </div>
                   <div className="min-w-0">
                     <p className="font-medium truncate">{g.name}</p>
