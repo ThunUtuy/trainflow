@@ -85,7 +85,7 @@ const ManagerGroups = () => {
 
       <form onSubmit={handleCreate} className="flex gap-2 px-5 pt-3">
         <Input
-          placeholder="New group name..."
+          placeholder="New role name..."
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           required
