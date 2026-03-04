@@ -188,18 +188,21 @@ export type Database = {
           establishment_id: string
           id: string
           name: string
+          template_source: string | null
         }
         Insert: {
           created_at?: string
           establishment_id: string
           id?: string
           name: string
+          template_source?: string | null
         }
         Update: {
           created_at?: string
           establishment_id?: string
           id?: string
           name?: string
+          template_source?: string | null
         }
         Relationships: [
           {
