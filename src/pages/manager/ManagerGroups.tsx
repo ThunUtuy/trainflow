@@ -28,7 +28,7 @@ const ManagerGroups = () => {
     if (!profile?.establishment_id) return;
     const { data } = await supabase
       .from("playlists")
-      .select("id, name")
+      .select("id, name, template_source")
       .eq("establishment_id", profile.establishment_id)
       .order("created_at");
 
