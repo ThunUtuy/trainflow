@@ -13,6 +13,7 @@ import { roleTemplates } from "@/data/roleTemplates";
 interface Group {
   id: string;
   name: string;
+  template_source: string | null;
   module_count: number;
   staff_count: number;
 }
