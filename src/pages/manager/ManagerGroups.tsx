@@ -99,7 +99,7 @@ const ManagerGroups = () => {
         {groups.length === 0 ? (
           <div className="text-center py-12 space-y-3">
             <FolderOpen className="mx-auto h-10 w-10 text-muted-foreground" />
-            <p className="text-muted-foreground">No groups yet. Create one above!</p>
+            <p className="text-muted-foreground">No roles yet. Create one above!</p>
           </div>
         ) : (
           <div className="grid gap-3">
