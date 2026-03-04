@@ -164,7 +164,7 @@ const ManagerGroupDetail = () => {
 
       <div className="mt-6">
         <Button className="w-full" onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save group"}
+          {saving ? "Saving..." : "Save role"}
         </Button>
       </div>
     </div>

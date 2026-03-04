@@ -126,8 +126,8 @@ const ManagerGroups = () => {
                 </button>
                 <ConfirmDeleteDialog
                   trigger={<button className="ml-2 p-2 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>}
-                  title="Delete group?"
-                  description="This will remove the group and unassign it from all staff."
+                  title="Delete role?"
+                  description="This will remove the role and unassign it from all staff."
                   onConfirm={() => handleDelete(g.id)}
                 />
               </motion.div>
