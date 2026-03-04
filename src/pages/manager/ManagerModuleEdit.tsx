@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,9 @@ interface ModulePage {
 const ManagerModuleEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromRole = searchParams.get("from") === "role";
+  const roleId = searchParams.get("roleId");
   const [moduleTitle, setModuleTitle] = useState("");
   const [moduleDesc, setModuleDesc] = useState("");
   const [pages, setPages] = useState<ModulePage[]>([]);
@@ -124,8 +127,8 @@ const ManagerModuleEdit = () => {
 
   return (
     <div className="min-h-screen px-5 pt-6 pb-10">
-      <button onClick={() => navigate("/manager/modules")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
-        <ArrowLeft className="h-4 w-4" /> Back to modules
+      <button onClick={() => navigate(fromRole && roleId ? `/manager/groups/${roleId}` : "/manager/modules")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <ArrowLeft className="h-4 w-4" /> {fromRole ? "Back to role" : "Back to modules"}
       </button>
 
       <div className="space-y-3 mb-6">

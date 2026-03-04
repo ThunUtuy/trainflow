@@ -159,12 +159,15 @@ const ManagerGroupDetail = () => {
                     exit={{ opacity: 0, x: -40 }}
                     className="flex items-center justify-between rounded-xl border bg-card p-4"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <button
+                      onClick={() => navigate(`/manager/modules/${mod.id}/edit?from=role&roleId=${groupId}`)}
+                      className="flex items-center gap-3 min-w-0 text-left flex-1"
+                    >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                         <BookOpen className="h-4 w-4 text-primary" />
                       </div>
                       <span className="font-medium truncate">{mod.title}</span>
-                    </div>
+                    </button>
                     <button
                       onClick={() => removeModule(mod.id)}
                       className="ml-2 p-2 text-muted-foreground hover:text-destructive transition-colors"
