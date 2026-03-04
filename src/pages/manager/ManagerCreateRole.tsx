@@ -182,6 +182,45 @@ const ManagerCreateRole = () => {
           </div>
         ))}
 
+        <button
+          onClick={() => setSelected("blank")}
+          className={cn(
+            "flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all",
+            selected === "blank"
+              ? "border-primary bg-primary/5"
+              : "border-border bg-card hover:border-primary/50"
+          )}
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+            <FileText className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <div>
+            <p className="font-medium">Blank role</p>
+            <p className="text-xs text-muted-foreground">
+              Start from scratch and add modules manually
+            </p>
+          </div>
+        </button>
+      </div>
+
+      {selected === "blank" && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="space-y-3 mb-6"
+        >
+          <div>
+            <Label htmlFor="name">Role name</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Barista, Kitchen Porter"
+            />
+          </div>
+        </motion.div>
+      )}
+
       <Button
         className="w-full"
         disabled={!selected || (selected === "blank" && !name.trim()) || loading}
