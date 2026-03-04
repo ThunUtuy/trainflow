@@ -78,22 +78,15 @@ const ManagerGroups = () => {
 
   return (
     <div className="min-h-screen pb-20">
-      <header className="px-5 pt-6 pb-2">
-        <h1 className="text-xl font-bold">Roles</h1>
-        <p className="text-sm text-muted-foreground">Group modules into training roles for your staff</p>
-      </header>
-
-      <form onSubmit={handleCreate} className="flex gap-2 px-5 pt-3">
-        <Input
-          placeholder="New role name..."
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          required
-        />
-        <Button type="submit" size="sm" disabled={creating}>
-          <Plus className="mr-1 h-4 w-4" /> Add
+      <header className="flex items-center justify-between px-5 pt-6 pb-2">
+        <div>
+          <h1 className="text-xl font-bold">Roles</h1>
+          <p className="text-sm text-muted-foreground">Group modules into training roles for your staff</p>
+        </div>
+        <Button size="sm" onClick={() => navigate("/manager/groups/create")}>
+          <Plus className="mr-1 h-4 w-4" /> New
         </Button>
-      </form>
+      </header>
 
       <section className="px-5 pt-4">
         {groups.length === 0 ? (

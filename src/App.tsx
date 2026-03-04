@@ -24,6 +24,7 @@ import ManagerCreateModule from "./pages/manager/ManagerCreateModule";
 import ManagerModuleEdit from "./pages/manager/ManagerModuleEdit";
 import ManagerInvite from "./pages/manager/ManagerInvite";
 import ManagerGroups from "./pages/manager/ManagerGroups";
+import ManagerCreateRole from "./pages/manager/ManagerCreateRole";
 import ManagerGroupDetail from "./pages/manager/ManagerGroupDetail";
 import NotFound from "./pages/NotFound";
 
