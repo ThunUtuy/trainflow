@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { BottomNav } from "@/components/BottomNav";
 import { motion } from "framer-motion";
-import { BookOpen, LogOut, KeyRound } from "lucide-react";
+import { BookOpen, LogOut, KeyRound, CheckCircle2, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Module {
   id: string;
@@ -14,11 +15,17 @@ interface Module {
   description: string;
 }
 
+interface QuizScore {
+  score: number;
+  total: number;
+}
+
 const StaffDashboard = () => {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuthContext();
   const [modules, setModules] = useState<Module[]>([]);
   const [progress, setProgress] = useState<Record<string, string>>({});
+  const [quizScores, setQuizScores] = useState<Record<string, QuizScore>>({});
   const [loading, setLoading] = useState(true);
 
   const hasEstablishment = !!profile?.establishment_id;
@@ -57,14 +64,25 @@ const StaffDashboard = () => {
         return;
       }
 
-      const [modRes, progRes] = await Promise.all([
+      const [modRes, progRes, quizRes] = await Promise.all([
         supabase.from("modules").select("id, title, description").in("id", Array.from(assignedModuleIds)).order("sort_order"),
         supabase.from("staff_module_progress").select("module_id, status").eq("user_id", user.id),
+        supabase.from("staff_quiz_attempts").select("quiz_id, score, total, completed_at, quizzes!inner(module_id)").eq("user_id", user.id).order("completed_at", { ascending: false }),
       ]);
       setModules((modRes.data as Module[]) || []);
       const map: Record<string, string> = {};
       progRes.data?.forEach((p: any) => { map[p.module_id] = p.status; });
       setProgress(map);
+
+      // Get latest quiz score per module
+      const scoreMap: Record<string, QuizScore> = {};
+      (quizRes.data || []).forEach((a: any) => {
+        const moduleId = a.quizzes?.module_id;
+        if (moduleId && !scoreMap[moduleId]) {
+          scoreMap[moduleId] = { score: a.score, total: a.total };
+        }
+      });
+      setQuizScores(scoreMap);
       setLoading(false);
     };
     fetchData();
@@ -119,20 +137,41 @@ const StaffDashboard = () => {
           <div className="grid gap-3">
             {modules.map((mod) => {
               const status = progress[mod.id] || "not_started";
+              const score = quizScores[mod.id];
+              const isCompleted = status === "completed";
+              const isInProgress = status === "in_progress";
               return (
                 <motion.button
                   key={mod.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   onClick={() => navigate(`/staff/modules/${mod.id}`)}
-                  className="flex items-start gap-3 rounded-xl border bg-card p-4 text-left transition-all hover:shadow-md w-full"
+                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all hover:shadow-md w-full ${isCompleted ? "border-green-500/30 bg-green-50/50 dark:bg-green-950/20" : "bg-card"}`}
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <BookOpen className="h-5 w-5 text-primary" />
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${isCompleted ? "bg-green-100 dark:bg-green-900/40" : "bg-primary/10"}`}>
+                    {isCompleted ? (
+                      <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    ) : isInProgress ? (
+                      <Clock className="h-5 w-5 text-primary" />
+                    ) : (
+                      <BookOpen className="h-5 w-5 text-primary" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm leading-snug">{mod.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm leading-snug">{mod.title}</p>
+                      {isCompleted && (
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-0">
+                          Done
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{mod.description}</p>
+                    {isCompleted && score && (
+                      <p className="text-xs font-medium text-green-600 dark:text-green-400 mt-1">
+                        Quiz: {score.score}/{score.total} ({Math.round((score.score / score.total) * 100)}%)
+                      </p>
+                    )}
                   </div>
                 </motion.button>
               );
