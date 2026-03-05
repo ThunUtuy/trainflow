@@ -137,20 +137,41 @@ const StaffDashboard = () => {
           <div className="grid gap-3">
             {modules.map((mod) => {
               const status = progress[mod.id] || "not_started";
+              const score = quizScores[mod.id];
+              const isCompleted = status === "completed";
+              const isInProgress = status === "in_progress";
               return (
                 <motion.button
                   key={mod.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   onClick={() => navigate(`/staff/modules/${mod.id}`)}
-                  className="flex items-start gap-3 rounded-xl border bg-card p-4 text-left transition-all hover:shadow-md w-full"
+                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all hover:shadow-md w-full ${isCompleted ? "border-green-500/30 bg-green-50/50 dark:bg-green-950/20" : "bg-card"}`}
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <BookOpen className="h-5 w-5 text-primary" />
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${isCompleted ? "bg-green-100 dark:bg-green-900/40" : "bg-primary/10"}`}>
+                    {isCompleted ? (
+                      <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    ) : isInProgress ? (
+                      <Clock className="h-5 w-5 text-primary" />
+                    ) : (
+                      <BookOpen className="h-5 w-5 text-primary" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm leading-snug">{mod.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm leading-snug">{mod.title}</p>
+                      {isCompleted && (
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-0">
+                          Done
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{mod.description}</p>
+                    {isCompleted && score && (
+                      <p className="text-xs font-medium text-green-600 dark:text-green-400 mt-1">
+                        Quiz: {score.score}/{score.total} ({Math.round((score.score / score.total) * 100)}%)
+                      </p>
+                    )}
                   </div>
                 </motion.button>
               );
