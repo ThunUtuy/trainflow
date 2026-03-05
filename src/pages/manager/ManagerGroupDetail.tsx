@@ -180,42 +180,86 @@ const ManagerGroupDetail = () => {
             </div>
           )}
 
-          <Sheet open={sheetOpen} onOpenChange={(open) => { setSheetOpen(open); if (!open) setSelectedToAdd(new Set()); }}>
+          <Sheet open={sheetOpen} onOpenChange={(open) => { setSheetOpen(open); if (!open) { setSelectedToAdd(new Set()); setAddMode(null); } }}>
             <SheetTrigger asChild>
               <Button variant="outline" className="w-full mt-4" size="sm">
-                <Plus className="mr-1.5 h-4 w-4" /> Add modules
+                <Plus className="mr-1.5 h-4 w-4" /> Add module
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="max-h-[70vh] overflow-y-auto rounded-t-2xl">
-              <SheetHeader>
-                <SheetTitle>Add modules to role</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4 grid gap-2">
-                {availableModules.length === 0 ? (
-                  <p className="text-center py-6 text-muted-foreground">All modules are already included.</p>
-                ) : (
-                  availableModules.map((mod) => (
-                    <label
-                      key={mod.id}
-                      className="flex items-center gap-3 rounded-xl border bg-card p-4 cursor-pointer hover:shadow-sm transition-shadow"
+              {!addMode ? (
+                <>
+                  <SheetHeader>
+                    <SheetTitle>Add module</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-4 grid gap-3">
+                    <button
+                      onClick={() => setAddMode("existing")}
+                      className="flex items-center gap-3 rounded-xl border bg-card p-4 text-left hover:shadow-sm transition-shadow"
                     >
-                      <Checkbox
-                        checked={selectedToAdd.has(mod.id)}
-                        onCheckedChange={() => toggleAddSelection(mod.id)}
-                      />
-                      <span className="font-medium">{mod.title}</span>
-                    </label>
-                  ))
-                )}
-              </div>
-              {availableModules.length > 0 && (
-                <Button
-                  className="w-full mt-4"
-                  onClick={confirmAddModules}
-                  disabled={selectedToAdd.size === 0}
-                >
-                  Add {selectedToAdd.size} module{selectedToAdd.size !== 1 ? "s" : ""}
-                </Button>
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <Library className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Select existing module</p>
+                        <p className="text-xs text-muted-foreground">Choose from your module library</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSheetOpen(false);
+                        navigate(`/manager/modules/create?roleId=${groupId}`);
+                      }}
+                      className="flex items-center gap-3 rounded-xl border bg-card p-4 text-left hover:shadow-sm transition-shadow"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <FilePlus className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Create new module</p>
+                        <p className="text-xs text-muted-foreground">Build a module from scratch or template</p>
+                      </div>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <SheetHeader>
+                    <SheetTitle>
+                      <button onClick={() => setAddMode(null)} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mr-2">
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                      </button>
+                      Module library
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-4 grid gap-2">
+                    {availableModules.length === 0 ? (
+                      <p className="text-center py-6 text-muted-foreground">All modules are already included.</p>
+                    ) : (
+                      availableModules.map((mod) => (
+                        <label
+                          key={mod.id}
+                          className="flex items-center gap-3 rounded-xl border bg-card p-4 cursor-pointer hover:shadow-sm transition-shadow"
+                        >
+                          <Checkbox
+                            checked={selectedToAdd.has(mod.id)}
+                            onCheckedChange={() => toggleAddSelection(mod.id)}
+                          />
+                          <span className="font-medium">{mod.title}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                  {availableModules.length > 0 && (
+                    <Button
+                      className="w-full mt-4"
+                      onClick={confirmAddModules}
+                      disabled={selectedToAdd.size === 0}
+                    >
+                      Add {selectedToAdd.size} module{selectedToAdd.size !== 1 ? "s" : ""}
+                    </Button>
+                  )}
+                </>
               )}
             </SheetContent>
           </Sheet>
