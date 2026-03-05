@@ -125,22 +125,15 @@ const StaffDashboard = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   onClick={() => navigate(`/staff/modules/${mod.id}`)}
-                  className="flex items-center gap-4 rounded-xl border bg-card p-4 text-left transition-all hover:shadow-md"
+                  className="flex items-start gap-3 rounded-xl border bg-card p-4 text-left transition-all hover:shadow-md w-full"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     <BookOpen className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{mod.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{mod.description}</p>
+                    <p className="font-medium text-sm leading-snug">{mod.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{mod.description}</p>
                   </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium whitespace-nowrap ${
-                    status === "completed" ? "bg-success/10 text-success" :
-                    status === "in_progress" ? "bg-warning/10 text-warning" :
-                    "bg-muted text-muted-foreground"
-                  }`}>
-                    {status === "completed" ? "Done" : status === "in_progress" ? "Started" : "New"}
-                  </span>
                 </motion.button>
               );
             })}
