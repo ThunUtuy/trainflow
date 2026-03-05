@@ -92,7 +92,7 @@ const StaffDashboard = () => {
   const overallPct = modules.length ? Math.round((completed / modules.length) * 100) : 0;
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 overflow-x-hidden">
       <header className="flex items-center justify-between px-5 pt-6 pb-2">
         <div>
           <p className="text-sm text-muted-foreground">Welcome back,</p>
