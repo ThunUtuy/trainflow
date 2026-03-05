@@ -13,7 +13,6 @@ export function BottomNav() {
   const items = role === "manager"
     ? [
         { icon: Users, label: "Team", path: "/manager/team" },
-        { icon: BookOpen, label: "Modules", path: "/manager/modules" },
         { icon: FolderOpen, label: "Roles", path: "/manager/groups" },
         { icon: Settings, label: "Settings", path: "/manager/invite" },
       ]

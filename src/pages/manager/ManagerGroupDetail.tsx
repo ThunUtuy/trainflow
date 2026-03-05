@@ -31,6 +31,7 @@ const ManagerGroupDetail = () => {
   const [saving, setSaving] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedToAdd, setSelectedToAdd] = useState<Set<string>>(new Set());
+  const [addMode, setAddMode] = useState<"existing" | null>(null);
 
   useEffect(() => {
     if (!groupId || !profile?.establishment_id) return;
