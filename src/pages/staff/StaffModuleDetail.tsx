@@ -106,7 +106,7 @@ const StaffModuleDetail = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Header — always visible */}
       <header className="flex items-center gap-2 px-4 pt-4 pb-2">
         <button

@@ -134,12 +134,12 @@ const StaffDashboard = () => {
                     <p className="font-medium truncate">{mod.title}</p>
                     <p className="text-xs text-muted-foreground truncate">{mod.description}</p>
                   </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium whitespace-nowrap ${
                     status === "completed" ? "bg-success/10 text-success" :
                     status === "in_progress" ? "bg-warning/10 text-warning" :
                     "bg-muted text-muted-foreground"
                   }`}>
-                    {status === "completed" ? "Done" : status === "in_progress" ? "In progress" : "Not started"}
+                    {status === "completed" ? "Done" : status === "in_progress" ? "Started" : "New"}
                   </span>
                 </motion.button>
               );

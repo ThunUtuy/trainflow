@@ -277,7 +277,7 @@ const ManagerModuleEdit = () => {
             {page.type === "checklist" && (
               <div className="space-y-2">
                 {(page.content?.items || []).map((item: string, idx: number) => (
-                  <div key={idx} className="flex gap-2">
+                  <div key={idx} className="flex gap-2 min-w-0">
                     <Input
                       value={item}
                       onChange={(e) => {
