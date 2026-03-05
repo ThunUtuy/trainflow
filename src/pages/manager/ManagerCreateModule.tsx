@@ -10,6 +10,13 @@ import { motion } from "framer-motion";
 import { ArrowLeft, FileText, ShieldCheck, Shirt, Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import handwashingImg from "@/assets/templates/handwashing.jpg";
+import foodTempImg from "@/assets/templates/food-temperature.jpg";
+import uniformImg from "@/assets/templates/uniform.jpg";
+import shoesImg from "@/assets/templates/shoes.jpg";
+import openingImg from "@/assets/templates/opening.jpg";
+import closingImg from "@/assets/templates/closing.jpg";
+
 const templates = [
   {
     key: "health_safety",
@@ -17,9 +24,12 @@ const templates = [
     title: "Health & Safety",
     description: "Food handling, hygiene, and workplace safety",
     pages: [
-      { type: "text" as const, title: "Introduction", content: { text: "Welcome to the Health & Safety module. This training covers essential hygiene and safety practices for your workplace." } },
-      { type: "checklist" as const, title: "Daily Hygiene Checklist", content: { items: ["Wash hands before starting shift", "Wear clean uniform and apron", "Tie back hair and remove jewelry", "Check food temperatures", "Clean and sanitise workstations"] } },
-      { type: "text" as const, title: "Emergency Procedures", content: { text: "In case of fire: Alert others, call emergency services, evacuate via nearest exit. In case of injury: Apply first aid, report to manager, fill incident form." } },
+      { type: "text" as const, title: "Why This Matters", content: { text: "Proper hygiene keeps your team and customers safe. Let's cover the essentials." } },
+      { type: "image" as const, title: "Wash Your Hands", content: { text: "Always wash hands before handling food and after breaks.", url: handwashingImg } },
+      { type: "image" as const, title: "Check Temperatures", content: { text: "Hot food above 63°C. Cold food below 5°C. Always use a thermometer.", url: foodTempImg } },
+      { type: "checklist" as const, title: "Start-of-Shift Checklist", content: { items: ["Wash hands thoroughly", "Put on clean apron", "Tie back hair, remove jewelry", "Check fridge temperatures", "Sanitise your workstation"] } },
+      { type: "text" as const, title: "Emergency: Fire", content: { text: "Alert others → Call emergency services → Evacuate via nearest exit." } },
+      { type: "text" as const, title: "Emergency: Injury", content: { text: "Apply first aid → Report to your manager → Complete an incident form." } },
     ],
     quiz: {
       title: "Health & Safety Quiz",
@@ -36,8 +46,11 @@ const templates = [
     title: "Dress Code",
     description: "Uniform standards and personal presentation",
     pages: [
-      { type: "text" as const, title: "Uniform Standards", content: { text: "All staff must wear the provided uniform. Uniforms must be clean, pressed, and in good condition. Name badges should be worn at all times." } },
-      { type: "checklist" as const, title: "Before Your Shift", content: { items: ["Clean, pressed uniform", "Name badge visible", "Closed-toe non-slip shoes", "Minimal jewelry", "Neat hair tied back"] } },
+      { type: "text" as const, title: "First Impressions Count", content: { text: "Your appearance reflects the business. A clean, neat look builds customer trust." } },
+      { type: "image" as const, title: "Your Uniform", content: { text: "Wear the provided uniform. Keep it clean, pressed, and in good condition.", url: uniformImg } },
+      { type: "image" as const, title: "Footwear", content: { text: "Closed-toe, non-slip shoes only. No sandals, trainers, or open-toe shoes.", url: shoesImg } },
+      { type: "text" as const, title: "Personal Presentation", content: { text: "Minimal jewelry. Hair tied back. Name badge visible at all times." } },
+      { type: "checklist" as const, title: "Before Your Shift", content: { items: ["Clean, pressed uniform", "Name badge visible", "Closed-toe non-slip shoes", "Minimal jewelry", "Hair tied back neatly"] } },
     ],
     quiz: {
       title: "Dress Code Quiz",
@@ -53,8 +66,11 @@ const templates = [
     title: "Workflow",
     description: "Daily tasks, opening and closing procedures",
     pages: [
-      { type: "text" as const, title: "Opening Procedures", content: { text: "Arrive 15 minutes before opening. Turn on all equipment. Check stock levels. Set up your station. Brief with manager on daily specials." } },
-      { type: "checklist" as const, title: "Closing Checklist", content: { items: ["Clean all surfaces", "Restock supplies", "Empty bins", "Turn off equipment", "Lock up and set alarm"] } },
+      { type: "text" as const, title: "Your Daily Rhythm", content: { text: "Every shift has a clear flow: open, serve, close. Knowing the routine keeps things smooth." } },
+      { type: "image" as const, title: "Opening Up", content: { text: "Arrive 15 minutes early. Turn on equipment and check stock levels.", url: openingImg } },
+      { type: "text" as const, title: "During Service", content: { text: "Stay at your station. Communicate with your team. Ask your manager about daily specials." } },
+      { type: "image" as const, title: "Closing Down", content: { text: "Clean all surfaces, restock, and secure the premises before leaving.", url: closingImg } },
+      { type: "checklist" as const, title: "Closing Checklist", content: { items: ["Wipe down all surfaces", "Restock supplies for tomorrow", "Empty all bins", "Turn off equipment", "Lock up and set alarm"] } },
     ],
     quiz: {
       title: "Workflow Quiz",
