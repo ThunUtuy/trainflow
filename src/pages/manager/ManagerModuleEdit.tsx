@@ -13,6 +13,19 @@ import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle
 
 type PageType = "text" | "image" | "video" | "checklist";
 
+const TEXT_CHAR_LIMIT = 150;
+
+const CharWarning = ({ text }: { text: string }) => {
+  const len = text.length;
+  if (len <= TEXT_CHAR_LIMIT) return null;
+  return (
+    <p className="flex items-center gap-1 text-xs text-warning mt-1">
+      <AlertTriangle className="h-3 w-3" />
+      {len} / {TEXT_CHAR_LIMIT} chars — microlearning cards work best with short text
+    </p>
+  );
+};
+
 interface ModulePage {
   id: string;
   type: PageType;
