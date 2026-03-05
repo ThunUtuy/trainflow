@@ -64,14 +64,25 @@ const StaffDashboard = () => {
         return;
       }
 
-      const [modRes, progRes] = await Promise.all([
+      const [modRes, progRes, quizRes] = await Promise.all([
         supabase.from("modules").select("id, title, description").in("id", Array.from(assignedModuleIds)).order("sort_order"),
         supabase.from("staff_module_progress").select("module_id, status").eq("user_id", user.id),
+        supabase.from("staff_quiz_attempts").select("quiz_id, score, total, completed_at, quizzes!inner(module_id)").eq("user_id", user.id).order("completed_at", { ascending: false }),
       ]);
       setModules((modRes.data as Module[]) || []);
       const map: Record<string, string> = {};
       progRes.data?.forEach((p: any) => { map[p.module_id] = p.status; });
       setProgress(map);
+
+      // Get latest quiz score per module
+      const scoreMap: Record<string, QuizScore> = {};
+      (quizRes.data || []).forEach((a: any) => {
+        const moduleId = a.quizzes?.module_id;
+        if (moduleId && !scoreMap[moduleId]) {
+          scoreMap[moduleId] = { score: a.score, total: a.total };
+        }
+      });
+      setQuizScores(scoreMap);
       setLoading(false);
     };
     fetchData();
