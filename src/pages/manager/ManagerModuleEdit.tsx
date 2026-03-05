@@ -205,12 +205,15 @@ const ManagerModuleEdit = () => {
             />
 
             {(page.type === "text") && (
-              <Textarea
-                placeholder="Enter text content..."
-                value={page.content?.text || ""}
-                onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
-                rows={4}
-              />
+              <div>
+                <Textarea
+                  placeholder="Enter text content..."
+                  value={page.content?.text || ""}
+                  onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
+                  rows={4}
+                />
+                <CharWarning text={page.content?.text || ""} />
+              </div>
             )}
 
             {page.type === "image" && (
