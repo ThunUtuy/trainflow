@@ -9,7 +9,7 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle } from "lucide-react";
 
 type PageType = "text" | "image" | "video" | "checklist";
 
