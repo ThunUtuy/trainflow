@@ -83,6 +83,8 @@ const templates = [
 
 const ManagerCreateModule = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const roleId = searchParams.get("roleId");
   const { profile } = useAuthContext();
   const [selected, setSelected] = useState<string | "blank" | null>(null);
   const [title, setTitle] = useState("");
