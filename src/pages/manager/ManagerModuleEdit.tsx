@@ -9,9 +9,22 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle } from "lucide-react";
 
 type PageType = "text" | "image" | "video" | "checklist";
+
+const TEXT_CHAR_LIMIT = 150;
+
+const CharWarning = ({ text }: { text: string }) => {
+  const len = text.length;
+  if (len <= TEXT_CHAR_LIMIT) return null;
+  return (
+    <p className="flex items-center gap-1 text-xs text-warning mt-1">
+      <AlertTriangle className="h-3 w-3" />
+      {len} / {TEXT_CHAR_LIMIT} chars — microlearning cards work best with short text
+    </p>
+  );
+};
 
 interface ModulePage {
   id: string;
@@ -192,22 +205,28 @@ const ManagerModuleEdit = () => {
             />
 
             {(page.type === "text") && (
-              <Textarea
-                placeholder="Enter text content..."
-                value={page.content?.text || ""}
-                onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
-                rows={4}
-              />
+              <div>
+                <Textarea
+                  placeholder="Enter text content..."
+                  value={page.content?.text || ""}
+                  onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
+                  rows={4}
+                />
+                <CharWarning text={page.content?.text || ""} />
+              </div>
             )}
 
             {page.type === "image" && (
               <div className="space-y-2">
-                <Textarea
-                  placeholder="Description text..."
-                  value={page.content?.text || ""}
-                  onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
-                  rows={2}
-                />
+                <div>
+                  <Textarea
+                    placeholder="Description text..."
+                    value={page.content?.text || ""}
+                    onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
+                    rows={2}
+                  />
+                  <CharWarning text={page.content?.text || ""} />
+                </div>
                 {page.content?.url && (
                   <img src={page.content.url} alt={page.title} className="rounded-lg w-full max-h-48 object-cover" />
                 )}
@@ -239,12 +258,15 @@ const ManagerModuleEdit = () => {
 
             {page.type === "video" && (
               <div className="space-y-2">
-                <Textarea
-                  placeholder="Description text..."
-                  value={page.content?.text || ""}
-                  onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
-                  rows={2}
-                />
+                <div>
+                  <Textarea
+                    placeholder="Description text..."
+                    value={page.content?.text || ""}
+                    onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
+                    rows={2}
+                  />
+                  <CharWarning text={page.content?.text || ""} />
+                </div>
                 {page.content?.url && (
                   <video src={page.content.url} controls className="rounded-lg w-full max-h-48" />
                 )}
