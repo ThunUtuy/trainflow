@@ -101,6 +101,10 @@
     @apply border-border;
   }
 
+  html, body, #root {
+    @apply max-w-full overflow-x-hidden;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'DM Sans', sans-serif;
