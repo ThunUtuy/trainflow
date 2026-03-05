@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -83,6 +83,8 @@ const templates = [
 
 const ManagerCreateModule = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const roleId = searchParams.get("roleId");
   const { profile } = useAuthContext();
   const [selected, setSelected] = useState<string | "blank" | null>(null);
   const [title, setTitle] = useState("");
@@ -146,14 +148,30 @@ const ManagerCreateModule = () => {
       }
     }
 
+    // Auto-assign to role if coming from role page
+    if (roleId) {
+      const { data: existingMods } = await supabase
+        .from("playlist_modules")
+        .select("sort_order")
+        .eq("playlist_id", roleId)
+        .order("sort_order", { ascending: false })
+        .limit(1);
+      const nextOrder = (existingMods?.[0]?.sort_order ?? -1) + 1;
+      await supabase.from("playlist_modules").insert({
+        playlist_id: roleId,
+        module_id: mod.id,
+        sort_order: nextOrder,
+      });
+    }
+
     setLoading(false);
     toast({ title: "Module created! ✨" });
-    navigate(`/manager/modules/${mod.id}/edit`);
+    navigate(roleId ? `/manager/modules/${mod.id}/edit?from=role&roleId=${roleId}` : `/manager/modules/${mod.id}/edit`);
   };
 
   return (
     <div className="min-h-screen px-5 pt-6 pb-10">
-      <button onClick={() => navigate("/manager/modules")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
+      <button onClick={() => navigate(roleId ? `/manager/groups/${roleId}` : "/manager/groups")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
 
