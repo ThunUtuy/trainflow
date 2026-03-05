@@ -92,7 +92,7 @@ const StaffDashboard = () => {
   const overallPct = modules.length ? Math.round((completed / modules.length) * 100) : 0;
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 overflow-x-hidden">
       <header className="flex items-center justify-between px-5 pt-6 pb-2">
         <div>
           <p className="text-sm text-muted-foreground">Welcome back,</p>
@@ -134,12 +134,12 @@ const StaffDashboard = () => {
                     <p className="font-medium truncate">{mod.title}</p>
                     <p className="text-xs text-muted-foreground truncate">{mod.description}</p>
                   </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium whitespace-nowrap ${
                     status === "completed" ? "bg-success/10 text-success" :
                     status === "in_progress" ? "bg-warning/10 text-warning" :
                     "bg-muted text-muted-foreground"
                   }`}>
-                    {status === "completed" ? "Done" : status === "in_progress" ? "In progress" : "Not started"}
+                    {status === "completed" ? "Done" : status === "in_progress" ? "Started" : "New"}
                   </span>
                 </motion.button>
               );

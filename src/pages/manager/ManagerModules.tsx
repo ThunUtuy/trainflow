@@ -45,7 +45,7 @@ const ManagerModules = () => {
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 overflow-x-hidden">
       <header className="flex items-center justify-between px-5 pt-6 pb-2">
         <h1 className="text-xl font-bold">Modules</h1>
         <Button size="sm" onClick={() => navigate("/manager/modules/create")}>

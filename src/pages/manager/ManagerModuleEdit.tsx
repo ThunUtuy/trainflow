@@ -126,7 +126,7 @@ const ManagerModuleEdit = () => {
   }
 
   return (
-    <div className="min-h-screen px-5 pt-6 pb-10">
+    <div className="min-h-screen px-5 pt-6 pb-10 overflow-x-hidden">
       <button onClick={() => navigate(fromRole && roleId ? `/manager/groups/${roleId}` : "/manager/modules")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="h-4 w-4" /> {fromRole ? "Back to role" : "Back to modules"}
       </button>
@@ -211,16 +211,16 @@ const ManagerModuleEdit = () => {
                 {page.content?.url && (
                   <img src={page.content.url} alt={page.title} className="rounded-lg w-full max-h-48 object-cover" />
                 )}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-1"
+                    className="gap-1 text-xs"
                     disabled={uploading === page.id}
                     onClick={() => document.getElementById(`upload-${page.id}`)?.click()}
                   >
                     <Upload className="h-4 w-4" />
-                    {uploading === page.id ? "Uploading..." : page.content?.url ? "Replace image" : "Upload image"}
+                    {uploading === page.id ? "Uploading..." : page.content?.url ? "Replace" : "Upload image"}
                   </Button>
                   <input
                     id={`upload-${page.id}`}
@@ -248,16 +248,16 @@ const ManagerModuleEdit = () => {
                 {page.content?.url && (
                   <video src={page.content.url} controls className="rounded-lg w-full max-h-48" />
                 )}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-1"
+                    className="gap-1 text-xs"
                     disabled={uploading === page.id}
                     onClick={() => document.getElementById(`upload-video-${page.id}`)?.click()}
                   >
                     <Upload className="h-4 w-4" />
-                    {uploading === page.id ? "Uploading..." : page.content?.url ? "Replace video" : "Upload video"}
+                    {uploading === page.id ? "Uploading..." : page.content?.url ? "Replace" : "Upload video"}
                   </Button>
                   <input
                     id={`upload-video-${page.id}`}
@@ -277,7 +277,7 @@ const ManagerModuleEdit = () => {
             {page.type === "checklist" && (
               <div className="space-y-2">
                 {(page.content?.items || []).map((item: string, idx: number) => (
-                  <div key={idx} className="flex gap-2">
+                  <div key={idx} className="flex gap-2 min-w-0">
                     <Input
                       value={item}
                       onChange={(e) => {
