@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { BottomNav } from "@/components/BottomNav";
 import { motion } from "framer-motion";
-import { BookOpen, LogOut, KeyRound } from "lucide-react";
+import { BookOpen, LogOut, KeyRound, CheckCircle2, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Module {
   id: string;
@@ -14,11 +15,17 @@ interface Module {
   description: string;
 }
 
+interface QuizScore {
+  score: number;
+  total: number;
+}
+
 const StaffDashboard = () => {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuthContext();
   const [modules, setModules] = useState<Module[]>([]);
   const [progress, setProgress] = useState<Record<string, string>>({});
+  const [quizScores, setQuizScores] = useState<Record<string, QuizScore>>({});
   const [loading, setLoading] = useState(true);
 
   const hasEstablishment = !!profile?.establishment_id;
