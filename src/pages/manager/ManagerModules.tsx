@@ -66,18 +66,18 @@ const ManagerModules = () => {
                 key={mod.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between rounded-xl border bg-card p-4"
+                className="flex items-start gap-3 rounded-xl border bg-card p-4"
               >
                 <button
                   onClick={() => navigate(`/manager/modules/${mod.id}/edit`)}
-                  className="flex items-center gap-3 text-left flex-1 min-w-0"
+                  className="flex items-start gap-3 text-left flex-1 min-w-0"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     <BookOpen className="h-5 w-5 text-primary" />
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{mod.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{mod.description}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm leading-snug">{mod.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{mod.description}</p>
                   </div>
                 </button>
                 <ConfirmDeleteDialog
