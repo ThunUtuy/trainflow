@@ -28,14 +28,12 @@ const ManagerTeam = () => {
     const fetch = async () => {
       const estId = profile!.establishment_id!;
 
-      const [estRes, staffRes, modsRes] = await Promise.all([
+      const [estRes, staffRes] = await Promise.all([
         supabase.from("establishments").select("name").eq("id", estId).single(),
         supabase.from("profiles").select("user_id, name").eq("establishment_id", estId),
-        supabase.from("modules").select("id").eq("establishment_id", estId),
       ]);
 
       setEstName(estRes.data?.name || "");
-      const totalModules = modsRes.data?.length || 0;
 
       // Filter to staff only
       const staffProfiles = staffRes.data || [];
@@ -50,17 +48,44 @@ const ManagerTeam = () => {
           .maybeSingle();
 
         if (roleData) {
-          const { data: progData } = await supabase
-            .from("staff_module_progress")
-            .select("status")
-            .eq("user_id", sp.user_id)
-            .eq("status", "completed");
+          // Get assigned modules: from playlists + individual assignments
+          const [playlistAssignRes, directAssignRes] = await Promise.all([
+            supabase.from("staff_playlist_assignments").select("playlist_id").eq("user_id", sp.user_id),
+            supabase.from("staff_module_assignments").select("module_id").eq("user_id", sp.user_id),
+          ]);
+
+          const assignedModuleIds = new Set<string>();
+
+          // Add directly assigned modules
+          (directAssignRes.data || []).forEach((r: any) => assignedModuleIds.add(r.module_id));
+
+          // Add modules from assigned playlists
+          const playlistIds = (playlistAssignRes.data || []).map((r: any) => r.playlist_id);
+          if (playlistIds.length > 0) {
+            const { data: plModData } = await supabase
+              .from("playlist_modules")
+              .select("module_id")
+              .in("playlist_id", playlistIds);
+            (plModData || []).forEach((r: any) => assignedModuleIds.add(r.module_id));
+          }
+
+          const totalAssigned = assignedModuleIds.size;
+          let completedCount = 0;
+
+          if (totalAssigned > 0) {
+            const { data: progData } = await supabase
+              .from("staff_module_progress")
+              .select("module_id, status")
+              .eq("user_id", sp.user_id)
+              .eq("status", "completed");
+            completedCount = (progData || []).filter((p: any) => assignedModuleIds.has(p.module_id)).length;
+          }
 
           staffWithRoles.push({
             user_id: sp.user_id,
             name: sp.name,
-            completed: progData?.length || 0,
-            total: totalModules,
+            completed: completedCount,
+            total: totalAssigned,
           });
         }
       }
