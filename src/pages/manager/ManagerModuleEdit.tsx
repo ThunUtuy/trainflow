@@ -218,12 +218,15 @@ const ManagerModuleEdit = () => {
 
             {page.type === "image" && (
               <div className="space-y-2">
-                <Textarea
-                  placeholder="Description text..."
-                  value={page.content?.text || ""}
-                  onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
-                  rows={2}
-                />
+                <div>
+                  <Textarea
+                    placeholder="Description text..."
+                    value={page.content?.text || ""}
+                    onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
+                    rows={2}
+                  />
+                  <CharWarning text={page.content?.text || ""} />
+                </div>
                 {page.content?.url && (
                   <img src={page.content.url} alt={page.title} className="rounded-lg w-full max-h-48 object-cover" />
                 )}
