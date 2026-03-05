@@ -148,9 +148,25 @@ const ManagerCreateModule = () => {
       }
     }
 
+    // Auto-assign to role if coming from role page
+    if (roleId) {
+      const { data: existingMods } = await supabase
+        .from("playlist_modules")
+        .select("sort_order")
+        .eq("playlist_id", roleId)
+        .order("sort_order", { ascending: false })
+        .limit(1);
+      const nextOrder = (existingMods?.[0]?.sort_order ?? -1) + 1;
+      await supabase.from("playlist_modules").insert({
+        playlist_id: roleId,
+        module_id: mod.id,
+        sort_order: nextOrder,
+      });
+    }
+
     setLoading(false);
     toast({ title: "Module created! ✨" });
-    navigate(`/manager/modules/${mod.id}/edit`);
+    navigate(roleId ? `/manager/modules/${mod.id}/edit?from=role&roleId=${roleId}` : `/manager/modules/${mod.id}/edit`);
   };
 
   return (
