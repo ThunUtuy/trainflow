@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Play } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
+import MicrolearningIntro from "@/components/microlearning/MicrolearningIntro";
+import MicrolearningCard from "@/components/microlearning/MicrolearningCard";
+import MicrolearningProgress from "@/components/microlearning/MicrolearningProgress";
+import MicrolearningComplete from "@/components/microlearning/MicrolearningComplete";
 
 interface ModulePage {
   id: string;
@@ -15,6 +18,8 @@ interface ModulePage {
   content: any;
   sort_order: number;
 }
+
+type Phase = "intro" | "cards" | "complete";
 
 const StaffModuleDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,20 +30,23 @@ const StaffModuleDetail = () => {
   const [hasQuiz, setHasQuiz] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const [phase, setPhase] = useState<Phase>("intro");
+  const [cardIndex, setCardIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+
   useEffect(() => {
     if (!id) return;
-    const fetch = async () => {
+    const fetchData = async () => {
       const [modRes, pagesRes, quizRes] = await Promise.all([
         supabase.from("modules").select("title, description").eq("id", id).single(),
         supabase.from("module_pages").select("*").eq("module_id", id).order("sort_order"),
         supabase.from("quizzes").select("id").eq("module_id", id).limit(1),
       ]);
       setModuleInfo(modRes.data);
-      setPages(pagesRes.data as ModulePage[] || []);
+      setPages((pagesRes.data as ModulePage[]) || []);
       setHasQuiz((quizRes.data?.length ?? 0) > 0);
       setLoading(false);
 
-      // Mark as in_progress only if not already completed
       if (user) {
         const { data: existing } = await supabase
           .from("staff_module_progress")
@@ -54,105 +62,135 @@ const StaffModuleDetail = () => {
         }
       }
     };
-    fetch();
+    fetchData();
   }, [id, user]);
 
-  if (loading) {
-    return <div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
-  }
+  const goNext = useCallback(() => {
+    if (cardIndex < pages.length - 1) {
+      setDirection(1);
+      setCardIndex((i) => i + 1);
+    } else {
+      // Last card — go to quiz or complete
+      if (hasQuiz) {
+        navigate(`/staff/modules/${id}/quiz`);
+      } else {
+        setPhase("complete");
+      }
+    }
+  }, [cardIndex, pages.length, hasQuiz, id, navigate]);
 
-  const renderPage = (page: ModulePage) => {
-    switch (page.type) {
-      case "text":
-        return <p className="whitespace-pre-wrap text-sm leading-relaxed">{page.content?.text || ""}</p>;
-      case "image":
-        return (
-          <div className="space-y-2">
-            {page.content?.text && <p className="text-sm">{page.content.text}</p>}
-            {page.content?.url && <img src={page.content.url} alt={page.title} className="rounded-lg w-full" />}
-          </div>
-        );
-      case "video":
-        return (
-          <div className="space-y-2">
-            {page.content?.text && <p className="text-sm">{page.content.text}</p>}
-            {page.content?.url && (
-              page.content.url.includes("module-videos") ? (
-                <video src={page.content.url} controls className="rounded-lg w-full" />
-              ) : (
-                <div className="aspect-video rounded-lg overflow-hidden bg-muted">
-                  <iframe src={page.content.url} className="h-full w-full" allowFullScreen />
-                </div>
-              )
-            )}
-          </div>
-        );
-      case "checklist":
-        return (
-          <ul className="space-y-3">
-            {(page.content?.items || []).map((item: string, i: number) => (
-              <li key={i} className="flex items-start gap-3">
-                <Checkbox
-                  id={`${page.id}-${i}`}
-                  className="mt-0.5"
-                  onCheckedChange={() => {}}
-                />
-                <label htmlFor={`${page.id}-${i}`} className="text-sm cursor-pointer select-none">{item}</label>
-              </li>
-            ))}
-          </ul>
-        );
-      default:
-        return null;
+  const goBack = useCallback(() => {
+    if (cardIndex > 0) {
+      setDirection(-1);
+      setCardIndex((i) => i - 1);
+    }
+  }, [cardIndex]);
+
+  const handleComplete = async () => {
+    if (user && id) {
+      await supabase.from("staff_module_progress").upsert(
+        { user_id: user.id, module_id: id, status: "completed" as any, updated_at: new Date().toISOString() },
+        { onConflict: "user_id,module_id" }
+      );
+      toast({ title: "Module completed! ✅" });
+      navigate("/staff/dashboard");
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen pb-10">
-      <header className="px-5 pt-6 pb-4">
-        <button onClick={() => navigate("/staff/dashboard")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-3">
-          <ArrowLeft className="h-4 w-4" /> Back
+    <div className="flex flex-col min-h-screen">
+      {/* Header — always visible */}
+      <header className="flex items-center gap-2 px-4 pt-4 pb-2">
+        <button
+          onClick={() => {
+            if (phase === "cards" && cardIndex === 0) {
+              setPhase("intro");
+            } else if (phase === "cards") {
+              goBack();
+            } else {
+              navigate("/staff/dashboard");
+            }
+          }}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
         </button>
-        <h1 className="text-2xl font-bold">{moduleInfo?.title}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{moduleInfo?.description}</p>
+        {phase === "cards" && (
+          <div className="flex-1">
+            <MicrolearningProgress current={cardIndex + 1} total={pages.length} />
+          </div>
+        )}
       </header>
 
-      <div className="px-5 space-y-6">
-        {pages.map((page, i) => (
-          <motion.div
-            key={page.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="rounded-xl border bg-card p-4"
-          >
-            <h3 className="font-semibold mb-2">{page.title}</h3>
-            {renderPage(page)}
-          </motion.div>
-        ))}
-
-        {hasQuiz && (
-          <Button className="w-full" onClick={() => navigate(`/staff/modules/${id}/quiz`)}>
-            <Play className="mr-2 h-4 w-4" /> Take quiz
-          </Button>
+      {/* Body */}
+      <div className="flex-1 flex flex-col justify-center px-5">
+        {phase === "intro" && moduleInfo && (
+          <MicrolearningIntro
+            title={moduleInfo.title}
+            description={moduleInfo.description}
+            totalCards={pages.length}
+            onStart={() => {
+              setCardIndex(0);
+              setDirection(1);
+              setPhase("cards");
+            }}
+          />
         )}
 
-        {!hasQuiz && pages.length > 0 && (
-          <Button
-            className="w-full"
-            onClick={async () => {
-              if (user && id) {
-                await supabase.from("staff_module_progress").upsert(
-                  { user_id: user.id, module_id: id, status: "completed" as any, updated_at: new Date().toISOString() },
-                  { onConflict: "user_id,module_id" }
-                );
-                toast({ title: "Module completed! ✅" });
-                navigate("/staff/dashboard");
-              }
+        {phase === "cards" && pages.length > 0 && (
+          <>
+            <div className="flex-1 flex items-center justify-center overflow-hidden">
+              <AnimatePresence mode="wait" custom={direction}>
+                <MicrolearningCard
+                  key={pages[cardIndex].id}
+                  page={pages[cardIndex]}
+                  direction={direction}
+                />
+              </AnimatePresence>
+            </div>
+
+            {/* Footer nav */}
+            <div className="flex items-center justify-between gap-3 py-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={goBack}
+                disabled={cardIndex === 0}
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+
+              <Button onClick={goNext} className="flex-1 max-w-[200px]">
+                {cardIndex === pages.length - 1
+                  ? hasQuiz
+                    ? <>Take quiz <Play className="ml-2 h-4 w-4" /></>
+                    : "Finish"
+                  : <>Next <ChevronRight className="ml-1 h-4 w-4" /></>}
+              </Button>
+
+              <div className="w-10" /> {/* spacer for symmetry */}
+            </div>
+          </>
+        )}
+
+        {phase === "complete" && moduleInfo && (
+          <MicrolearningComplete
+            title={moduleInfo.title}
+            onReview={() => {
+              setCardIndex(0);
+              setDirection(1);
+              setPhase("cards");
             }}
-          >
-            Mark as completed
-          </Button>
+            onContinue={handleComplete}
+          />
         )}
       </div>
     </div>
