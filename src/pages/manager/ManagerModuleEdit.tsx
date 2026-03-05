@@ -248,16 +248,16 @@ const ManagerModuleEdit = () => {
                 {page.content?.url && (
                   <video src={page.content.url} controls className="rounded-lg w-full max-h-48" />
                 )}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-1"
+                    className="gap-1 text-xs"
                     disabled={uploading === page.id}
                     onClick={() => document.getElementById(`upload-video-${page.id}`)?.click()}
                   >
                     <Upload className="h-4 w-4" />
-                    {uploading === page.id ? "Uploading..." : page.content?.url ? "Replace video" : "Upload video"}
+                    {uploading === page.id ? "Uploading..." : page.content?.url ? "Replace" : "Upload video"}
                   </Button>
                   <input
                     id={`upload-video-${page.id}`}
