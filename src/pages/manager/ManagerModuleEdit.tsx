@@ -258,12 +258,15 @@ const ManagerModuleEdit = () => {
 
             {page.type === "video" && (
               <div className="space-y-2">
-                <Textarea
-                  placeholder="Description text..."
-                  value={page.content?.text || ""}
-                  onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
-                  rows={2}
-                />
+                <div>
+                  <Textarea
+                    placeholder="Description text..."
+                    value={page.content?.text || ""}
+                    onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
+                    rows={2}
+                  />
+                  <CharWarning text={page.content?.text || ""} />
+                </div>
                 {page.content?.url && (
                   <video src={page.content.url} controls className="rounded-lg w-full max-h-48" />
                 )}
