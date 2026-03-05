@@ -147,7 +147,7 @@ const StaffModuleDetail = () => {
 
         {phase === "cards" && pages.length > 0 && (
           <>
-            <div className="flex-1 flex items-center justify-center overflow-hidden">
+            <div className="flex-1 flex items-center justify-center overflow-hidden max-w-full">
               <AnimatePresence mode="wait" custom={direction}>
                 <MicrolearningCard
                   key={pages[cardIndex].id}
