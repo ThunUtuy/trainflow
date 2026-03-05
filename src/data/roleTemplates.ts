@@ -1,9 +1,9 @@
 import { ShieldCheck, Shirt, Workflow, UtensilsCrossed, ChefHat, Coffee } from "lucide-react";
 
 export interface TemplatePage {
-  type: "text" | "checklist";
+  type: "text" | "checklist" | "image";
   title: string;
-  content: { text?: string; items?: string[] };
+  content: { text?: string; items?: string[]; url?: string };
 }
 
 export interface TemplateQuiz {
