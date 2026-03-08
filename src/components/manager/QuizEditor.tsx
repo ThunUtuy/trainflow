@@ -240,13 +240,12 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
                   {(Object.keys(QUESTION_TYPE_LABELS) as QuestionType[]).map((type) => (
                     <button
                       key={type}
-                      onClick={() => {
-                        const newOptions = type === "true_false" ? ["True", "False"] : q.options;
+                    onClick={() => {
                         updateQuestion(q.id, "type", type);
                         if (type === "true_false") {
                           updateQuestion(q.id, "options", ["True", "False"]);
                         }
-                        updateQuestion(q.id, "correct_answers", []);
+                        updateQuestion(q.id, "correct_answers", [0]);
                       }}
                       className={`flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
                         q.type === type
