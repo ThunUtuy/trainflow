@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle, Lightbulb } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { QuizEditor } from "@/components/manager/QuizEditor";
 
 type PageType = "text" | "image" | "video" | "checklist";
 
@@ -351,6 +352,8 @@ const ManagerModuleEdit = () => {
       {pages.length === 0 && (
         <p className="text-center text-muted-foreground py-8">No pages yet. Add one using the button above.</p>
       )}
+
+      {id && <QuizEditor moduleId={id} />}
     </div>
   );
 };
