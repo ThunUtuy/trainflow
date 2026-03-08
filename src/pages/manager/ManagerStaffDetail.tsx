@@ -208,9 +208,16 @@ const ManagerStaffDetail = () => {
                       </span>
                     </div>
                   </div>
-                  {ms.quiz_score && (
-                    <span className="text-sm text-muted-foreground">{ms.quiz_score}</span>
-                  )}
+                  {ms.quiz_score && (() => {
+                    const [s, t] = ms.quiz_score.split("/").map(Number);
+                    const pct = Math.round((s / t) * 100);
+                    const passed = pct >= 70;
+                    return (
+                      <span className={`text-sm font-medium ${passed ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
+                        {ms.quiz_score} ({pct}%)
+                      </span>
+                    );
+                  })()}
                 </motion.div>
               ))}
             </div>
