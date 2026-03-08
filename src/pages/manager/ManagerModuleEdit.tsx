@@ -145,6 +145,13 @@ const ManagerModuleEdit = () => {
         <ArrowLeft className="h-4 w-4" /> {fromRole ? "Back to role" : "Back to modules"}
       </button>
 
+      <Alert className="mb-5 border-primary/20 bg-primary/5">
+        <Lightbulb className="h-4 w-4 text-primary" />
+        <AlertDescription className="text-xs text-muted-foreground">
+          <strong className="text-foreground">Tip:</strong> Aim for 3–5 minute microlearning modules. Focus on one key idea and use visuals (images or short videos) to make the content easier to understand.
+        </AlertDescription>
+      </Alert>
+
       <div className="space-y-3 mb-6">
         <div>
           <Label>Module title</Label>
