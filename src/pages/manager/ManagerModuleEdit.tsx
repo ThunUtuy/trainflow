@@ -352,6 +352,8 @@ const ManagerModuleEdit = () => {
       {pages.length === 0 && (
         <p className="text-center text-muted-foreground py-8">No pages yet. Add one using the button above.</p>
       )}
+
+      {id && <QuizEditor moduleId={id} />}
     </div>
   );
 };
