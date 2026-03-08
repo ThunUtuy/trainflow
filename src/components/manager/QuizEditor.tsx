@@ -310,11 +310,6 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
                       <Plus className="h-3 w-3" /> Add option
                     </Button>
                   )}
-                  {q.correct_answers.length === 0 && (
-                    <p className="text-xs text-destructive font-medium flex items-center gap-1 bg-destructive/10 rounded-md px-2 py-1.5">
-                      ⚠ You must mark at least one correct answer
-                    </p>
-                  )}
                 </div>
               </motion.div>
             ))}
