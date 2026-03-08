@@ -96,14 +96,6 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
 
   const addQuestion = async (type: QuestionType) => {
     if (!quiz) return;
-
-    // Prevent adding new questions if any existing question has no correct answer
-    const incomplete = questions.find((q) => q.correct_answers.length === 0);
-    if (incomplete) {
-      toast({ title: "Mark a correct answer on all existing questions first", variant: "destructive" });
-      return;
-    }
-
     const defaultOptions = type === "true_false" ? ["True", "False"] : ["Option 1", "Option 2"];
     const { data } = await supabase
       .from("quiz_questions")
@@ -112,7 +104,7 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
         type,
         question_text: "",
         options: defaultOptions,
-        correct_answers: [],
+        correct_answers: [0],
         sort_order: questions.length,
       })
       .select("*")
@@ -145,6 +137,9 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
     if (question.type === "single_choice" || question.type === "true_false") {
       newCorrect = [idx];
     } else {
+      if (question.correct_answers.includes(idx) && question.correct_answers.length <= 1) {
+        return; // prevent deselecting the last answer
+      }
       newCorrect = question.correct_answers.includes(idx)
         ? question.correct_answers.filter((i) => i !== idx)
         : [...question.correct_answers, idx];
@@ -248,13 +243,12 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
                   {(Object.keys(QUESTION_TYPE_LABELS) as QuestionType[]).map((type) => (
                     <button
                       key={type}
-                      onClick={() => {
-                        const newOptions = type === "true_false" ? ["True", "False"] : q.options;
+                    onClick={() => {
                         updateQuestion(q.id, "type", type);
                         if (type === "true_false") {
                           updateQuestion(q.id, "options", ["True", "False"]);
                         }
-                        updateQuestion(q.id, "correct_answers", []);
+                        updateQuestion(q.id, "correct_answers", [0]);
                       }}
                       className={`flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
                         q.type === type
@@ -315,11 +309,6 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
                     <Button variant="ghost" size="sm" onClick={() => addOption(q)} className="gap-1 text-xs">
                       <Plus className="h-3 w-3" /> Add option
                     </Button>
-                  )}
-                  {q.correct_answers.length === 0 && (
-                    <p className="text-xs text-destructive font-medium flex items-center gap-1 bg-destructive/10 rounded-md px-2 py-1.5">
-                      ⚠ You must mark at least one correct answer
-                    </p>
                   )}
                 </div>
               </motion.div>
