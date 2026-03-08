@@ -96,14 +96,6 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
 
   const addQuestion = async (type: QuestionType) => {
     if (!quiz) return;
-
-    // Prevent adding new questions if any existing question has no correct answer
-    const incomplete = questions.find((q) => q.correct_answers.length === 0);
-    if (incomplete) {
-      toast({ title: "Mark a correct answer on all existing questions first", variant: "destructive" });
-      return;
-    }
-
     const defaultOptions = type === "true_false" ? ["True", "False"] : ["Option 1", "Option 2"];
     const { data } = await supabase
       .from("quiz_questions")
@@ -112,7 +104,7 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
         type,
         question_text: "",
         options: defaultOptions,
-        correct_answers: [],
+        correct_answers: [0],
         sort_order: questions.length,
       })
       .select("*")
