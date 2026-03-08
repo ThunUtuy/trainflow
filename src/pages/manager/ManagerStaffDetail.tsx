@@ -106,7 +106,7 @@ const ManagerStaffDetail = () => {
       module_id: m.id,
       title: m.title,
       status: progMap[m.id] || "not_started",
-      quiz_score: (progMap[m.id] === "completed" && quizMap[m.id]) ? `${quizMap[m.id].score}/${quizMap[m.id].total}` : null,
+      quiz_score: quizMap[m.id] ? `${quizMap[m.id].score}/${quizMap[m.id].total}` : null,
       source: groupModuleIds.has(m.id) ? "group" as const : "individual" as const,
     })));
 
