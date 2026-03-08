@@ -137,6 +137,9 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
     if (question.type === "single_choice" || question.type === "true_false") {
       newCorrect = [idx];
     } else {
+      if (question.correct_answers.includes(idx) && question.correct_answers.length <= 1) {
+        return; // prevent deselecting the last answer
+      }
       newCorrect = question.correct_answers.includes(idx)
         ? question.correct_answers.filter((i) => i !== idx)
         : [...question.correct_answers, idx];
