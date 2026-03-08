@@ -167,9 +167,14 @@ const StaffDashboard = () => {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{mod.description}</p>
-                    {isCompleted && score && (
-                      <p className="text-xs font-medium text-green-600 dark:text-green-400 mt-1">
+                    {score && (
+                      <p className={`text-xs font-medium mt-1 ${
+                        Math.round((score.score / score.total) * 100) >= 70
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-amber-600 dark:text-amber-400"
+                      }`}>
                         Quiz: {score.score}/{score.total} ({Math.round((score.score / score.total) * 100)}%)
+                        {Math.round((score.score / score.total) * 100) < 70 && " — Retry needed"}
                       </p>
                     )}
                   </div>
