@@ -9,7 +9,8 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle, Lightbulb } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type PageType = "text" | "image" | "video" | "checklist";
 
@@ -143,6 +144,13 @@ const ManagerModuleEdit = () => {
       <button onClick={() => navigate(fromRole && roleId ? `/manager/groups/${roleId}` : "/manager/modules")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="h-4 w-4" /> {fromRole ? "Back to role" : "Back to modules"}
       </button>
+
+      <Alert className="mb-5 border-primary/20 bg-primary/5">
+        <Lightbulb className="h-4 w-4 text-primary" />
+        <AlertDescription className="text-xs text-muted-foreground">
+          <strong className="text-foreground">Tip:</strong> Aim for 3–5 minute microlearning modules. Focus on one key idea and use visuals (images or short videos) to make the content easier to understand.
+        </AlertDescription>
+      </Alert>
 
       <div className="space-y-3 mb-6">
         <div>
