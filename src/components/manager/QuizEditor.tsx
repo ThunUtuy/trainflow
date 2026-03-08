@@ -96,6 +96,14 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
 
   const addQuestion = async (type: QuestionType) => {
     if (!quiz) return;
+
+    // Prevent adding new questions if any existing question has no correct answer
+    const incomplete = questions.find((q) => q.correct_answers.length === 0);
+    if (incomplete) {
+      toast({ title: "Mark a correct answer on all existing questions first", variant: "destructive" });
+      return;
+    }
+
     const defaultOptions = type === "true_false" ? ["True", "False"] : ["Option 1", "Option 2"];
     const { data } = await supabase
       .from("quiz_questions")
@@ -309,8 +317,8 @@ export const QuizEditor = ({ moduleId }: { moduleId: string }) => {
                     </Button>
                   )}
                   {q.correct_answers.length === 0 && (
-                    <p className="text-xs text-warning flex items-center gap-1">
-                      ⚠ Mark at least one correct answer
+                    <p className="text-xs text-destructive font-medium flex items-center gap-1 bg-destructive/10 rounded-md px-2 py-1.5">
+                      ⚠ You must mark at least one correct answer
                     </p>
                   )}
                 </div>
