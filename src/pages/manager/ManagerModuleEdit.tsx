@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle, Lightbulb } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { QuizEditor } from "@/components/manager/QuizEditor";
+import ManagerMicrolearningOnboarding, { shouldShowOnboarding } from "@/components/manager/ManagerMicrolearningOnboarding";
 
 type PageType = "text" | "image" | "video" | "checklist";
 
