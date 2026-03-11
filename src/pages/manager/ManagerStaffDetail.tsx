@@ -170,7 +170,11 @@ const ManagerStaffDetail = () => {
       supabase.from("staff_playlist_assignments").delete().eq("user_id", staffId),
       supabase.from("staff_module_assignments").delete().eq("user_id", staffId),
     ]);
-    await supabase.from("profiles").update({ establishment_id: null }).eq("user_id", staffId);
+    const { error } = await supabase.from("profiles").update({ establishment_id: null }).eq("user_id", staffId);
+    if (error) {
+      toast({ title: "Failed to remove staff", description: error.message, variant: "destructive" });
+      return;
+    }
     toast({ title: "Staff member removed" });
     navigate("/manager/team");
   };
