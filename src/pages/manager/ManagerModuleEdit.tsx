@@ -49,6 +49,7 @@ const ManagerModuleEdit = () => {
   const [loading, setLoading] = useState(true);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(() => shouldShowOnboarding());
 
   const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
 
