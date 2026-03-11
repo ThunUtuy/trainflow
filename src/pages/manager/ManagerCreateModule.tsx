@@ -91,6 +91,7 @@ const ManagerCreateModule = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => shouldShowOnboarding());
 
   const handleCreate = async () => {
     if (!profile?.establishment_id) return;
