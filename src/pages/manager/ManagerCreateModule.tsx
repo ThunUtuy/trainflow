@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { ArrowLeft, FileText, ShieldCheck, Shirt, Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ManagerMicrolearningOnboarding, { shouldShowOnboarding } from "@/components/manager/ManagerMicrolearningOnboarding";
 
 import handwashingImg from "@/assets/templates/handwashing.jpg";
 import foodTempImg from "@/assets/templates/food-temperature.jpg";
