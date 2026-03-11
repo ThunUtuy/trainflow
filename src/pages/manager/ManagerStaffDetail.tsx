@@ -163,11 +163,35 @@ const ManagerStaffDetail = () => {
     return <div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
   }
 
+  const handleRemoveStaff = async () => {
+    if (!staffId) return;
+    // Delete assignments, then unlink from establishment
+    await Promise.all([
+      supabase.from("staff_playlist_assignments").delete().eq("user_id", staffId),
+      supabase.from("staff_module_assignments").delete().eq("user_id", staffId),
+    ]);
+    await supabase.from("profiles").update({ establishment_id: null }).eq("user_id", staffId);
+    toast({ title: "Staff member removed" });
+    navigate("/manager/team");
+  };
+
   return (
     <div className="min-h-screen px-5 pt-6 pb-10">
-      <button onClick={() => navigate("/manager/team")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-3">
-        <ArrowLeft className="h-4 w-4" /> Back to team
-      </button>
+      <div className="flex items-center justify-between mb-3">
+        <button onClick={() => navigate("/manager/team")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to team
+        </button>
+        <ConfirmDeleteDialog
+          trigger={
+            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+              <UserMinus className="h-5 w-5" />
+            </Button>
+          }
+          title={`Remove ${staffName}?`}
+          description="They'll lose access to all assigned training and will need a new invite code to rejoin."
+          onConfirm={handleRemoveStaff}
+        />
+      </div>
 
       <h1 className="text-2xl font-bold mb-1">{staffName}</h1>
 
