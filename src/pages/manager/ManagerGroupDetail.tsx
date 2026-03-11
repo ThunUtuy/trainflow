@@ -170,12 +170,16 @@ const ManagerGroupDetail = () => {
                       </div>
                       <span className="font-medium truncate">{mod.title}</span>
                     </button>
-                    <button
-                      onClick={() => removeModule(mod.id)}
-                      className="ml-2 p-2 text-muted-foreground hover:text-destructive transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <ConfirmDeleteDialog
+                      trigger={
+                        <button className="ml-2 p-2 text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      }
+                      title="Remove module?"
+                      description="This module will be removed from this role. The module itself won't be deleted."
+                      onConfirm={() => removeModule(mod.id)}
+                    />
                   </motion.div>
                 ))}
               </AnimatePresence>
