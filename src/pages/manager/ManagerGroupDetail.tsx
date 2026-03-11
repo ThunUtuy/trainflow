@@ -167,7 +167,18 @@ const ManagerGroupDetail = () => {
         <ArrowLeft className="h-4 w-4" /> Back to roles
       </button>
 
-      <h1 className="text-2xl font-bold mb-1">{groupName}</h1>
+      <ManagerMicrolearningOnboarding open={showOnboarding} onClose={() => setShowOnboarding(false)} />
+
+      <div className="flex items-start justify-between mb-1">
+        <h1 className="text-2xl font-bold">{groupName}</h1>
+        <button
+          onClick={() => setShowOnboarding(true)}
+          className="p-1.5 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors mt-1"
+          aria-label="Microlearning tips"
+        >
+          <Info className="h-4 w-4" />
+        </button>
+      </div>
       <p className="text-sm text-muted-foreground mb-4">Manage modules and staff for this role</p>
 
       <Tabs defaultValue="modules">
