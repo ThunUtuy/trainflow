@@ -165,16 +165,20 @@ const ManagerStaffDetail = () => {
 
   const handleRemoveStaff = async () => {
     if (!staffId) return;
-    // Delete assignments, then unlink from establishment
-    await Promise.all([
-      supabase.from("staff_playlist_assignments").delete().eq("user_id", staffId),
-      supabase.from("staff_module_assignments").delete().eq("user_id", staffId),
-    ]);
-    const { error } = await supabase.from("profiles").update({ establishment_id: null }).eq("user_id", staffId);
-    if (error) {
-      toast({ title: "Failed to remove staff", description: error.message, variant: "destructive" });
+
+    const { data, error } = await supabase.functions.invoke("remove-staff", {
+      body: { staffId },
+    });
+
+    if (error || data?.error) {
+      toast({
+        title: "Failed to remove staff",
+        description: error?.message || data?.error || "Please try again.",
+        variant: "destructive",
+      });
       return;
     }
+
     toast({ title: "Staff member removed" });
     navigate("/manager/team");
   };
