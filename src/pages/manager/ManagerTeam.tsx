@@ -16,6 +16,7 @@ interface StaffMember {
 
 const ManagerTeam = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile, signOut } = useAuthContext();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [estName, setEstName] = useState("");
