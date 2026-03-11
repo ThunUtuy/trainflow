@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, Users, Trash2, Plus, Library, FilePlus } from "lucide-react";
+import { ArrowLeft, BookOpen, Users, Trash2, Plus, Library, FilePlus, Info } from "lucide-react";
+import ManagerMicrolearningOnboarding from "@/components/manager/ManagerMicrolearningOnboarding";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
