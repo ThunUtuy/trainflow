@@ -5,7 +5,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, CheckCircle2, Circle, XCircle, FolderOpen, BookOpen } from "lucide-react";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+import { ArrowLeft, CheckCircle2, Circle, XCircle, FolderOpen, BookOpen, UserMinus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
