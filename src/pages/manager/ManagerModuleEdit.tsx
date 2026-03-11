@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle, Lightbulb } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { QuizEditor } from "@/components/manager/QuizEditor";
+import ManagerMicrolearningOnboarding, { shouldShowOnboarding } from "@/components/manager/ManagerMicrolearningOnboarding";
 
 type PageType = "text" | "image" | "video" | "checklist";
 
@@ -48,6 +49,7 @@ const ManagerModuleEdit = () => {
   const [loading, setLoading] = useState(true);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(() => shouldShowOnboarding());
 
   const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
 
@@ -142,6 +144,7 @@ const ManagerModuleEdit = () => {
 
   return (
     <div className="min-h-screen px-5 pt-6 pb-10 overflow-x-hidden">
+      <ManagerMicrolearningOnboarding open={showOnboarding} onClose={() => setShowOnboarding(false)} />
       <button onClick={() => navigate(fromRole && roleId ? `/manager/groups/${roleId}` : "/manager/modules")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="h-4 w-4" /> {fromRole ? "Back to role" : "Back to modules"}
       </button>

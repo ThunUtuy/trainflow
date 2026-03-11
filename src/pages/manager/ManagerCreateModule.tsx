@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { ArrowLeft, FileText, ShieldCheck, Shirt, Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ManagerMicrolearningOnboarding, { shouldShowOnboarding } from "@/components/manager/ManagerMicrolearningOnboarding";
 
 import handwashingImg from "@/assets/templates/handwashing.jpg";
 import foodTempImg from "@/assets/templates/food-temperature.jpg";
@@ -90,6 +91,7 @@ const ManagerCreateModule = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => shouldShowOnboarding());
 
   const handleCreate = async () => {
     if (!profile?.establishment_id) return;
@@ -171,6 +173,7 @@ const ManagerCreateModule = () => {
 
   return (
     <div className="min-h-screen px-5 pt-6 pb-10">
+      <ManagerMicrolearningOnboarding open={showOnboarding} onClose={() => setShowOnboarding(false)} />
       <button onClick={() => navigate(roleId ? `/manager/groups/${roleId}` : "/manager/groups")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="h-4 w-4" /> Back
       </button>

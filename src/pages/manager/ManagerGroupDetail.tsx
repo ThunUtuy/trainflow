@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, Users, Trash2, Plus, Library, FilePlus } from "lucide-react";
+import { ArrowLeft, BookOpen, Users, Trash2, Plus, Library, FilePlus, Info } from "lucide-react";
+import ManagerMicrolearningOnboarding from "@/components/manager/ManagerMicrolearningOnboarding";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -44,6 +45,7 @@ const ManagerGroupDetail = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedToAdd, setSelectedToAdd] = useState<Set<string>>(new Set());
   const [addMode, setAddMode] = useState<"existing" | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     if (!groupId || !profile?.establishment_id) return;
@@ -165,7 +167,18 @@ const ManagerGroupDetail = () => {
         <ArrowLeft className="h-4 w-4" /> Back to roles
       </button>
 
-      <h1 className="text-2xl font-bold mb-1">{groupName}</h1>
+      <ManagerMicrolearningOnboarding open={showOnboarding} onClose={() => setShowOnboarding(false)} />
+
+      <div className="flex items-start justify-between mb-1">
+        <h1 className="text-2xl font-bold">{groupName}</h1>
+        <button
+          onClick={() => setShowOnboarding(true)}
+          className="p-1.5 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors mt-1"
+          aria-label="Microlearning tips"
+        >
+          <Info className="h-4 w-4" />
+        </button>
+      </div>
       <p className="text-sm text-muted-foreground mb-4">Manage modules and staff for this role</p>
 
       <Tabs defaultValue="modules">
