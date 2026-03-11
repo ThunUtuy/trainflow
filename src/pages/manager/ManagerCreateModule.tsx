@@ -172,7 +172,8 @@ const ManagerCreateModule = () => {
   };
 
   return (
-    <div className="min-h-screen px-5 pt-6 pb-10">
+      <ManagerMicrolearningOnboarding open={showOnboarding} onClose={() => setShowOnboarding(false)} />
+      <div className="min-h-screen px-5 pt-6 pb-10">
       <button onClick={() => navigate(roleId ? `/manager/groups/${roleId}` : "/manager/groups")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
