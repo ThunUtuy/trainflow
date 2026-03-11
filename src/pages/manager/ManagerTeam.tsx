@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ interface StaffMember {
 
 const ManagerTeam = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile, signOut } = useAuthContext();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [estName, setEstName] = useState("");
@@ -94,7 +95,7 @@ const ManagerTeam = () => {
       setLoading(false);
     };
     fetch();
-  }, [hasEstablishment, profile]);
+  }, [hasEstablishment, profile, location.key]);
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
