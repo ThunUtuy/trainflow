@@ -10,6 +10,17 @@ import { ArrowLeft, BookOpen, Users, Trash2, Plus, Library, FilePlus } from "luc
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Sheet,
   SheetContent,
   SheetHeader,
@@ -29,7 +40,7 @@ const ManagerGroupDetail = () => {
   const [allModules, setAllModules] = useState<Module[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingStaff, setSavingStaff] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedToAdd, setSelectedToAdd] = useState<Set<string>>(new Set());
   const [addMode, setAddMode] = useState<"existing" | null>(null);
@@ -74,8 +85,19 @@ const ManagerGroupDetail = () => {
     fetchData();
   }, [groupId, profile]);
 
-  const removeModule = (moduleId: string) => {
+  const removeModule = async (moduleId: string) => {
+    if (!groupId) return;
     setIncludedModules((prev) => prev.filter((m) => m.id !== moduleId));
+    const { error } = await supabase
+      .from("playlist_modules")
+      .delete()
+      .eq("playlist_id", groupId)
+      .eq("module_id", moduleId);
+    if (error) {
+      toast({ title: "Failed to remove module", variant: "destructive" });
+    } else {
+      toast({ title: "Module removed ✓" });
+    }
   };
 
   const toggleAddSelection = (moduleId: string) => {
@@ -87,13 +109,26 @@ const ManagerGroupDetail = () => {
     });
   };
 
-  const confirmAddModules = () => {
+  const confirmAddModules = async () => {
+    if (!groupId) return;
     const newMods = allModules.filter(
       (m) => selectedToAdd.has(m.id) && !includedModules.some((inc) => inc.id === m.id)
     );
+    if (newMods.length === 0) return;
+
     setIncludedModules((prev) => [...prev, ...newMods]);
     setSelectedToAdd(new Set());
     setSheetOpen(false);
+
+    const startOrder = includedModules.length;
+    const { error } = await supabase.from("playlist_modules").insert(
+      newMods.map((m, i) => ({ playlist_id: groupId, module_id: m.id, sort_order: startOrder + i }))
+    );
+    if (error) {
+      toast({ title: "Failed to add modules", variant: "destructive" });
+    } else {
+      toast({ title: `${newMods.length} module${newMods.length !== 1 ? "s" : ""} added ✓` });
+    }
   };
 
   const toggleStaff = (userId: string) => {
@@ -104,17 +139,9 @@ const ManagerGroupDetail = () => {
     (m) => !includedModules.some((inc) => inc.id === m.id)
   );
 
-  const handleSave = async () => {
+  const handleSaveStaff = async () => {
     if (!groupId) return;
-    setSaving(true);
-
-    const currentModIds = includedModules.map((m) => m.id);
-    await supabase.from("playlist_modules").delete().eq("playlist_id", groupId);
-    if (currentModIds.length > 0) {
-      await supabase.from("playlist_modules").insert(
-        currentModIds.map((mid, i) => ({ playlist_id: groupId, module_id: mid, sort_order: i }))
-      );
-    }
+    setSavingStaff(true);
 
     const currentStaffIds = staff.filter((s) => s.assigned).map((s) => s.user_id);
     await supabase.from("staff_playlist_assignments").delete().eq("playlist_id", groupId);
@@ -124,8 +151,8 @@ const ManagerGroupDetail = () => {
       );
     }
 
-    setSaving(false);
-    toast({ title: "Role saved ✓" });
+    setSavingStaff(false);
+    toast({ title: "Staff assignments saved ✓" });
   };
 
   if (loading) {
@@ -275,33 +302,51 @@ const ManagerGroupDetail = () => {
           {staff.length === 0 ? (
             <p className="text-center py-8 text-muted-foreground">No staff members yet. Invite them first!</p>
           ) : (
-            <div className="grid gap-2">
-              {staff.map((s) => (
-                <motion.label
-                  key={s.user_id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-3 rounded-xl border bg-card p-4 cursor-pointer hover:shadow-sm transition-shadow"
-                >
-                  <Checkbox checked={s.assigned} onCheckedChange={() => toggleStaff(s.user_id)} />
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                      {s.name.charAt(0).toUpperCase()}
+            <>
+              <div className="grid gap-2">
+                {staff.map((s) => (
+                  <motion.label
+                    key={s.user_id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 rounded-xl border bg-card p-4 cursor-pointer hover:shadow-sm transition-shadow"
+                  >
+                    <Checkbox checked={s.assigned} onCheckedChange={() => toggleStaff(s.user_id)} />
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                        {s.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-medium">{s.name}</span>
                     </div>
-                    <span className="font-medium">{s.name}</span>
-                  </div>
-                </motion.label>
-              ))}
-            </div>
+                  </motion.label>
+                ))}
+              </div>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="w-full mt-4" disabled={savingStaff}>
+                    {savingStaff ? "Saving..." : "Save staff assignments"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Update staff assignments?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will update which staff members are assigned to the "{groupName}" role. Their training content will change accordingly.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleSaveStaff}>
+                      Confirm
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
           )}
         </TabsContent>
       </Tabs>
-
-      <div className="mt-6">
-        <Button className="w-full" onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save role"}
-        </Button>
-      </div>
     </div>
   );
 };
