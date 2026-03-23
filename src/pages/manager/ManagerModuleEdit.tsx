@@ -238,7 +238,7 @@ const ManagerModuleEdit = () => {
                   onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
                   rows={4}
                 />
-                <CharWarning text={page.content?.text || ""} />
+                <CharWarning text={page.content?.text || ""} onCondense={() => setCondenseTarget({ pageId: page.id, text: page.content?.text || "" })} />
               </div>
             )}
 
