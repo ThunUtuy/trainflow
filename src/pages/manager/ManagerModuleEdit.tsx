@@ -9,23 +9,36 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle, Lightbulb } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle, Lightbulb, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { QuizEditor } from "@/components/manager/QuizEditor";
 import ManagerMicrolearningOnboarding, { shouldShowOnboarding } from "@/components/manager/ManagerMicrolearningOnboarding";
+import CondenseTextAssist from "@/components/manager/CondenseTextAssist";
 
 type PageType = "text" | "image" | "video" | "checklist";
 
 const TEXT_CHAR_LIMIT = 150;
 
-const CharWarning = ({ text }: { text: string }) => {
+const CharWarning = ({ text, onCondense }: { text: string; onCondense?: () => void }) => {
   const len = text.length;
   if (len <= TEXT_CHAR_LIMIT) return null;
   return (
-    <p className="flex items-center gap-1 text-xs text-warning mt-1">
-      <AlertTriangle className="h-3 w-3" />
-      {len} / {TEXT_CHAR_LIMIT} chars — microlearning cards work best with short text
-    </p>
+    <div className="flex items-center justify-between mt-1">
+      <p className="flex items-center gap-1 text-xs text-warning">
+        <AlertTriangle className="h-3 w-3" />
+        {len} / {TEXT_CHAR_LIMIT} chars — too long for a microlearning card
+      </p>
+      {onCondense && (
+        <button
+          type="button"
+          onClick={onCondense}
+          className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+        >
+          <Sparkles className="h-3 w-3" />
+          Condense
+        </button>
+      )}
+    </div>
   );
 };
 
@@ -50,6 +63,7 @@ const ManagerModuleEdit = () => {
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(() => shouldShowOnboarding());
+  const [condenseTarget, setCondenseTarget] = useState<{ pageId: string; text: string } | null>(null);
 
   const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
 
@@ -224,7 +238,7 @@ const ManagerModuleEdit = () => {
                   onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
                   rows={4}
                 />
-                <CharWarning text={page.content?.text || ""} />
+                <CharWarning text={page.content?.text || ""} onCondense={() => setCondenseTarget({ pageId: page.id, text: page.content?.text || "" })} />
               </div>
             )}
 
@@ -237,7 +251,7 @@ const ManagerModuleEdit = () => {
                     onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
                     rows={2}
                   />
-                  <CharWarning text={page.content?.text || ""} />
+                  <CharWarning text={page.content?.text || ""} onCondense={() => setCondenseTarget({ pageId: page.id, text: page.content?.text || "" })} />
                 </div>
                 {page.content?.url && (
                   <img src={page.content.url} alt={page.title} className="rounded-lg w-full max-h-48 object-cover" />
@@ -277,7 +291,7 @@ const ManagerModuleEdit = () => {
                     onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
                     rows={2}
                   />
-                  <CharWarning text={page.content?.text || ""} />
+                  <CharWarning text={page.content?.text || ""} onCondense={() => setCondenseTarget({ pageId: page.id, text: page.content?.text || "" })} />
                 </div>
                 {page.content?.url && (
                   <video src={page.content.url} controls className="rounded-lg w-full max-h-48" />
@@ -306,7 +320,7 @@ const ManagerModuleEdit = () => {
                   />
                 </div>
                 <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <AlertTriangle className="h-3 w-3 text-amber-500" />
+                  <AlertTriangle className="h-3 w-3 text-warning" />
                   Recommended length: 30s – 2 mins for best learning retention
                 </p>
               </div>
@@ -357,6 +371,22 @@ const ManagerModuleEdit = () => {
       )}
 
       {id && <QuizEditor moduleId={id} />}
+
+      <CondenseTextAssist
+        open={!!condenseTarget}
+        onClose={() => setCondenseTarget(null)}
+        originalText={condenseTarget?.text || ""}
+        onAccept={(text) => {
+          if (condenseTarget) {
+            const page = pages.find((p) => p.id === condenseTarget.pageId);
+            if (page) {
+              updatePage(condenseTarget.pageId, "content", { ...page.content, text });
+            }
+          }
+          setCondenseTarget(null);
+          toast({ title: "Condensed text applied!" });
+        }}
+      />
     </div>
   );
 };
