@@ -19,14 +19,26 @@ type PageType = "text" | "image" | "video" | "checklist";
 
 const TEXT_CHAR_LIMIT = 150;
 
-const CharWarning = ({ text }: { text: string }) => {
+const CharWarning = ({ text, onCondense }: { text: string; onCondense?: () => void }) => {
   const len = text.length;
   if (len <= TEXT_CHAR_LIMIT) return null;
   return (
-    <p className="flex items-center gap-1 text-xs text-warning mt-1">
-      <AlertTriangle className="h-3 w-3" />
-      {len} / {TEXT_CHAR_LIMIT} chars — microlearning cards work best with short text
-    </p>
+    <div className="flex items-center justify-between mt-1">
+      <p className="flex items-center gap-1 text-xs text-warning">
+        <AlertTriangle className="h-3 w-3" />
+        {len} / {TEXT_CHAR_LIMIT} chars — too long for a microlearning card
+      </p>
+      {onCondense && (
+        <button
+          type="button"
+          onClick={onCondense}
+          className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+        >
+          <Sparkles className="h-3 w-3" />
+          Condense
+        </button>
+      )}
+    </div>
   );
 };
 
