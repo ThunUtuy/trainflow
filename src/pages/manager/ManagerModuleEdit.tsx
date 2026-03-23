@@ -371,6 +371,22 @@ const ManagerModuleEdit = () => {
       )}
 
       {id && <QuizEditor moduleId={id} />}
+
+      <CondenseTextAssist
+        open={!!condenseTarget}
+        onClose={() => setCondenseTarget(null)}
+        originalText={condenseTarget?.text || ""}
+        onAccept={(text) => {
+          if (condenseTarget) {
+            const page = pages.find((p) => p.id === condenseTarget.pageId);
+            if (page) {
+              updatePage(condenseTarget.pageId, "content", { ...page.content, text });
+            }
+          }
+          setCondenseTarget(null);
+          toast({ title: "Condensed text applied!" });
+        }}
+      />
     </div>
   );
 };
