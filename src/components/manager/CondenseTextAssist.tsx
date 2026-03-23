@@ -3,8 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, ArrowLeft, Check, Pencil } from "lucide-react";
+import { Sparkles, ArrowLeft, Check, Pencil, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface CondenseTextAssistProps {
   open: boolean;
@@ -14,43 +16,50 @@ interface CondenseTextAssistProps {
   charLimit?: number;
 }
 
-/**
- * Mock condense function — later replaced with real AI call.
- * Splits into sentences, keeps the most impactful ones within limit.
- */
-function mockCondense(text: string, limit: number): string {
-  const sentences = text.match(/[^.!?]+[.!?]*/g) || [text];
-  let result = "";
-  for (const s of sentences) {
-    const trimmed = s.trim();
-    if ((result + " " + trimmed).trim().length <= limit) {
-      result = (result + " " + trimmed).trim();
-    } else if (!result) {
-      // First sentence already too long — truncate it
-      result = trimmed.slice(0, limit - 3).trim() + "...";
-      break;
-    } else {
-      break;
-    }
-  }
-  return result || text.slice(0, limit - 3).trim() + "...";
-}
-
 const CondenseTextAssist = ({ open, onClose, originalText, onAccept, charLimit = 150 }: CondenseTextAssistProps) => {
   const [condensed, setCondensed] = useState("");
   const [editedCondensed, setEditedCondensed] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("condensed");
 
   useEffect(() => {
-    if (open) {
-      const result = mockCondense(originalText, charLimit);
-      setCondensed(result);
-      setEditedCondensed(result);
+    if (open && originalText) {
       setIsEditing(false);
       setActiveTab("condensed");
+      setCondensed("");
+      setEditedCondensed("");
+      condenseWithAI();
     }
   }, [open, originalText, charLimit]);
+
+  const condenseWithAI = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("condense-text", {
+        body: { text: originalText, charLimit },
+      });
+
+      if (error) throw error;
+
+      const result = data?.condensed || originalText.slice(0, charLimit - 3) + "...";
+      setCondensed(result);
+      setEditedCondensed(result);
+    } catch (e: any) {
+      console.error("Condense error:", e);
+      toast({
+        title: "Couldn't condense text",
+        description: e?.message || "Please try again.",
+        variant: "destructive",
+      });
+      // Fallback to simple truncation
+      const fallback = originalText.slice(0, charLimit - 3).trim() + "...";
+      setCondensed(fallback);
+      setEditedCondensed(fallback);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const currentCondensed = isEditing ? editedCondensed : condensed;
   const condensedLen = currentCondensed.length;
@@ -88,7 +97,20 @@ const CondenseTextAssist = ({ open, onClose, originalText, onAccept, charLimit =
 
           <TabsContent value="condensed" className="mt-3">
             <AnimatePresence mode="wait">
-              {isEditing ? (
+              {isLoading ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="rounded-lg border border-primary/20 bg-primary/5 p-3 min-h-[120px] flex items-center justify-center"
+                >
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Condensing with AI...
+                  </div>
+                </motion.div>
+              ) : isEditing ? (
                 <motion.div
                   key="editing"
                   initial={{ opacity: 0 }}
@@ -115,26 +137,28 @@ const CondenseTextAssist = ({ open, onClose, originalText, onAccept, charLimit =
                 </motion.div>
               )}
             </AnimatePresence>
-            <div className="flex items-center justify-between mt-2">
-              <p className={`text-xs ${isWithinLimit ? "text-green-600" : "text-warning"}`}>
-                {condensedLen} / {charLimit} characters
-                {isWithinLimit && " ✓"}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs gap-1 h-7"
-                onClick={() => {
-                  if (isEditing) {
-                    setCondensed(editedCondensed);
-                  }
-                  setIsEditing(!isEditing);
-                }}
-              >
-                <Pencil className="h-3 w-3" />
-                {isEditing ? "Done editing" : "Edit"}
-              </Button>
-            </div>
+            {!isLoading && (
+              <div className="flex items-center justify-between mt-2">
+                <p className={`text-xs ${isWithinLimit ? "text-green-600" : "text-warning"}`}>
+                  {condensedLen} / {charLimit} characters
+                  {isWithinLimit && " ✓"}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs gap-1 h-7"
+                  onClick={() => {
+                    if (isEditing) {
+                      setCondensed(editedCondensed);
+                    }
+                    setIsEditing(!isEditing);
+                  }}
+                >
+                  <Pencil className="h-3 w-3" />
+                  {isEditing ? "Done editing" : "Edit"}
+                </Button>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
@@ -143,7 +167,7 @@ const CondenseTextAssist = ({ open, onClose, originalText, onAccept, charLimit =
             <ArrowLeft className="h-3 w-3" />
             Keep original
           </Button>
-          <Button size="sm" className="flex-1 gap-1" onClick={() => onAccept(currentCondensed)}>
+          <Button size="sm" className="flex-1 gap-1" disabled={isLoading} onClick={() => onAccept(currentCondensed)}>
             <Check className="h-3 w-3" />
             Use condensed
           </Button>
