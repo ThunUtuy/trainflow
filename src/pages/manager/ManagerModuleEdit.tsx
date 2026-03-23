@@ -13,6 +13,7 @@ import { ArrowLeft, Plus, Trash2, GripVertical, Upload, ImageIcon, AlertTriangle
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { QuizEditor } from "@/components/manager/QuizEditor";
 import ManagerMicrolearningOnboarding, { shouldShowOnboarding } from "@/components/manager/ManagerMicrolearningOnboarding";
+import CondenseTextAssist from "@/components/manager/CondenseTextAssist";
 
 type PageType = "text" | "image" | "video" | "checklist";
 
