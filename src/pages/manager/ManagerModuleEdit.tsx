@@ -320,7 +320,7 @@ const ManagerModuleEdit = () => {
                   />
                 </div>
                 <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <AlertTriangle className="h-3 w-3 text-amber-500" />
+                  <AlertTriangle className="h-3 w-3 text-warning" />
                   Recommended length: 30s – 2 mins for best learning retention
                 </p>
               </div>
