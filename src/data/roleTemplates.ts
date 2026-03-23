@@ -84,6 +84,7 @@ export const roleTemplates: RoleTemplate[] = [
           { type: "text", title: "Anticipate Needs", content: { text: "Empty glass? Dropped napkin? Confused look? Act before the guest asks. That's great service." } },
           { type: "text", title: "Positive Language", content: { text: "Say 'Absolutely!' not 'No problem.' Say 'Great choice!' not 'OK.' Words matter." } },
           { type: "text", title: "Always Ask About Allergies", content: { text: "\"Does anyone have allergies or dietary requirements?\" If unsure about ingredients, check with the kitchen." } },
+          { type: "text", title: "Checking on the guest", content: { text: "Check on your table approximately two minutes after the food has been delivered, or after they have had a chance to take about two bites." } },
           { type: "checklist", title: "Service Checklist", content: { items: ["Greet within 30 seconds", "Ask about allergies", "Repeat orders back", "Check in after food arrives", "Thank guests when they leave"] } },
         ],
         quiz: {
@@ -110,7 +111,7 @@ export const roleTemplates: RoleTemplate[] = [
           title: "Greeting & Seating Quiz",
           questions: [
             { question_text: "How long to hold a reserved table past booking time?", type: "single_choice", options: ["5 minutes", "15 minutes", "30 minutes", "1 hour"], correct_answers: [1] },
-            { question_text: "Seat a couple at a 6-top during peak hours.", type: "true_false", options: ["True", "False"], correct_answers: [1] },
+            { question_text: "Seat a couple at a 6-top(table for 6 people) during peak hours.", type: "true_false", options: ["True", "False"], correct_answers: [1] },
             { question_text: "What if the restaurant is full with no reservation?", type: "single_choice", options: ["Turn them away", "Give honest wait time, offer the bar", "Seat at a dirty table", "Ignore them"], correct_answers: [1] },
           ],
         },
@@ -123,7 +124,7 @@ export const roleTemplates: RoleTemplate[] = [
           { type: "text", title: "Taking Orders Right", content: { text: "Use seat numbers. Write everything down. Read the order back to confirm. Never rely on memory." } },
           { type: "text", title: "Upselling Done Right", content: { text: "Be specific: 'Our sea bass is incredible tonight' beats 'Want a starter?' Read the table first." } },
           { type: "text", title: "Specials", content: { text: "Memorise daily specials before service. Describe flavours, not just ingredients." } },
-          { type: "checklist", title: "Order Checklist", content: { items: ["Know specials and 86'd items", "Ask about allergies", "Use seat numbers", "Write every order down", "Read order back to guest", "Enter into POS promptly"] } },
+          { type: "checklist", title: "Order Checklist", content: { items: ["Know specials and 86'd items (Items unavailable)", "Ask about allergies", "Use seat numbers", "Write every order down", "Read order back to guest", "Enter into POS promptly"] } },
         ],
         quiz: {
           title: "Taking Orders Quiz",
@@ -170,7 +171,7 @@ export const roleTemplates: RoleTemplate[] = [
           questions: [
             { question_text: "Why never share your POS login?", type: "single_choice", options: ["Slows the system", "All actions tracked under your ID", "Health and safety", "Battery usage"], correct_answers: [1] },
             { question_text: "Card declined — what to say?", type: "single_choice", options: ["'Your card is declined'", "'Payment didn't go through — try again or another method?'", "'Pay cash'", "'I'll call the bank'"], correct_answers: [1] },
-            { question_text: "You can void served items without manager approval.", type: "true_false", options: ["True", "False"], correct_answers: [1] },
+            { question_text: "You can void served items (removing itesms from bill) without manager approval.", type: "true_false", options: ["True", "False"], correct_answers: [1] },
           ],
         },
       },
