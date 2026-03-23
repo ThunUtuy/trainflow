@@ -251,7 +251,7 @@ const ManagerModuleEdit = () => {
                     onChange={(e) => updatePage(page.id, "content", { ...page.content, text: e.target.value })}
                     rows={2}
                   />
-                  <CharWarning text={page.content?.text || ""} />
+                  <CharWarning text={page.content?.text || ""} onCondense={() => setCondenseTarget({ pageId: page.id, text: page.content?.text || "" })} />
                 </div>
                 {page.content?.url && (
                   <img src={page.content.url} alt={page.title} className="rounded-lg w-full max-h-48 object-cover" />
