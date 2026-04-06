@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import confetti from "canvas-confetti";
 
 interface Question {
   id: string;
@@ -75,7 +76,6 @@ const StaffQuiz = () => {
     if (current < questions.length - 1) {
       setCurrent(current + 1);
     } else {
-      // Score it
       let correct = 0;
       newAnswers.forEach((ans, i) => {
         const ca = questions[i].correct_answers;
@@ -84,7 +84,14 @@ const StaffQuiz = () => {
       setScore(correct);
       setSubmitted(true);
 
-      // Save attempt and mark completed
+      // Confetti on pass
+      const pct = Math.round((correct / questions.length) * 100);
+      if (pct >= 70) {
+        setTimeout(() => {
+          confetti({ particleCount: 100, spread: 90, origin: { y: 0.6 }, colors: ["#e8772e", "#2d9f6f", "#f5a623"] });
+        }, 300);
+      }
+
       if (user && quizId) {
         const saveResults = async () => {
           await supabase.from("staff_quiz_attempts").insert({
@@ -94,7 +101,6 @@ const StaffQuiz = () => {
             total: questions.length,
             answers: newAnswers,
           });
-          // Mark module completed if passed (≥70%)
           if (correct / questions.length >= 0.7 && id) {
             await supabase.from("staff_module_progress").upsert(
               { user_id: user.id, module_id: id, status: "completed" as any, updated_at: new Date().toISOString() },
@@ -112,8 +118,23 @@ const StaffQuiz = () => {
     const passed = pct >= 70;
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6">
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-sm text-center space-y-5">
-          {passed ? <CheckCircle2 className="mx-auto h-16 w-16 text-success" /> : <XCircle className="mx-auto h-16 w-16 text-destructive" />}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-sm text-center space-y-5"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+          >
+            {passed
+              ? <CheckCircle2 className="mx-auto h-16 w-16 text-success" />
+              : <motion.div animate={{ x: [0, -8, 8, -8, 8, 0] }} transition={{ duration: 0.5 }}>
+                  <XCircle className="mx-auto h-16 w-16 text-destructive" />
+                </motion.div>
+            }
+          </motion.div>
           <h1 className="text-2xl font-bold">{passed ? "Great job!" : "Keep trying!"}</h1>
           <p className="text-3xl font-bold text-primary">{score}/{questions.length}</p>
           <p className="text-muted-foreground">{pct}% — {passed ? "You passed!" : "You need 70% to pass."}</p>
@@ -133,7 +154,7 @@ const StaffQuiz = () => {
         <span className="text-sm text-muted-foreground">Question {current + 1} of {questions.length}</span>
         <div className="flex gap-1">
           {questions.map((_, i) => (
-            <div key={i} className={cn("h-1.5 w-6 rounded-full", i <= current ? "bg-primary" : "bg-muted")} />
+            <div key={i} className={cn("h-1.5 w-6 rounded-full transition-colors", i <= current ? "bg-primary" : "bg-muted")} />
           ))}
         </div>
       </div>
@@ -144,8 +165,9 @@ const StaffQuiz = () => {
 
         <div className="grid gap-2">
           {q.options.map((opt, idx) => (
-            <button
+            <motion.button
               key={idx}
+              whileTap={{ scale: 0.97 }}
               onClick={() => toggleOption(idx)}
               className={cn(
                 "rounded-xl border p-4 text-left text-sm transition-all",
@@ -155,7 +177,7 @@ const StaffQuiz = () => {
               )}
             >
               {opt}
-            </button>
+            </motion.button>
           ))}
         </div>
 

@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, RotateCcw, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
 
 interface MicrolearningCompleteProps {
   title: string;
@@ -9,6 +11,20 @@ interface MicrolearningCompleteProps {
 }
 
 const MicrolearningComplete = ({ title, onReview, onContinue }: MicrolearningCompleteProps) => {
+  useEffect(() => {
+    const end = Date.now() + 600;
+    const burst = () => {
+      confetti({
+        particleCount: 60,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#e8772e", "#2d9f6f", "#f5a623", "#4a90d9"],
+      });
+      if (Date.now() < end) requestAnimationFrame(burst);
+    };
+    burst();
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
