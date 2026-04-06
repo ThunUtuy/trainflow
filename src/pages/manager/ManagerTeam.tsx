@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/BottomNav";
+import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { Users, Building2, LogOut } from "lucide-react";
 
@@ -13,6 +14,14 @@ interface StaffMember {
   completed: number;
   total: number;
 }
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.06, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 
 const ManagerTeam = () => {
   const navigate = useNavigate();
@@ -36,37 +45,25 @@ const ManagerTeam = () => {
 
       setEstName(estRes.data?.name || "");
 
-      // Filter to staff only
       const staffProfiles = staffRes.data || [];
       const staffWithRoles: StaffMember[] = [];
 
       for (const sp of staffProfiles) {
         const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", sp.user_id)
-          .eq("role", "staff")
-          .maybeSingle();
+          .from("user_roles").select("role").eq("user_id", sp.user_id).eq("role", "staff").maybeSingle();
 
         if (roleData) {
-          // Get assigned modules: from playlists + individual assignments
           const [playlistAssignRes, directAssignRes] = await Promise.all([
             supabase.from("staff_playlist_assignments").select("playlist_id").eq("user_id", sp.user_id),
             supabase.from("staff_module_assignments").select("module_id").eq("user_id", sp.user_id),
           ]);
 
           const assignedModuleIds = new Set<string>();
-
-          // Add directly assigned modules
           (directAssignRes.data || []).forEach((r: any) => assignedModuleIds.add(r.module_id));
 
-          // Add modules from assigned playlists
           const playlistIds = (playlistAssignRes.data || []).map((r: any) => r.playlist_id);
           if (playlistIds.length > 0) {
-            const { data: plModData } = await supabase
-              .from("playlist_modules")
-              .select("module_id")
-              .in("playlist_id", playlistIds);
+            const { data: plModData } = await supabase.from("playlist_modules").select("module_id").in("playlist_id", playlistIds);
             (plModData || []).forEach((r: any) => assignedModuleIds.add(r.module_id));
           }
 
@@ -74,20 +71,11 @@ const ManagerTeam = () => {
           let completedCount = 0;
 
           if (totalAssigned > 0) {
-            const { data: progData } = await supabase
-              .from("staff_module_progress")
-              .select("module_id, status")
-              .eq("user_id", sp.user_id)
-              .eq("status", "completed");
+            const { data: progData } = await supabase.from("staff_module_progress").select("module_id, status").eq("user_id", sp.user_id).eq("status", "completed");
             completedCount = (progData || []).filter((p: any) => assignedModuleIds.has(p.module_id)).length;
           }
 
-          staffWithRoles.push({
-            user_id: sp.user_id,
-            name: sp.name,
-            completed: completedCount,
-            total: totalAssigned,
-          });
+          staffWithRoles.push({ user_id: sp.user_id, name: sp.name, completed: completedCount, total: totalAssigned });
         }
       }
 
@@ -98,7 +86,18 @@ const ManagerTeam = () => {
   }, [hasEstablishment, profile, location.key]);
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
+    return (
+      <div className="min-h-screen pb-20">
+        <div className="px-5 pt-6 pb-2 space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-7 w-36" />
+        </div>
+        <div className="px-5 pt-4 space-y-3">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
+        </div>
+        <BottomNav />
+      </div>
+    );
   }
 
   if (!hasEstablishment) {
@@ -117,13 +116,17 @@ const ManagerTeam = () => {
 
   return (
     <div className="min-h-screen pb-20">
-      <header className="flex items-center justify-between px-5 pt-6 pb-2">
+      <motion.header
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between px-5 pt-6 pb-2"
+      >
         <div>
           <p className="text-sm text-muted-foreground">{estName}</p>
           <h1 className="text-xl font-bold">Your team</h1>
         </div>
         <Button variant="ghost" size="icon" onClick={signOut}><LogOut className="h-5 w-5" /></Button>
-      </header>
+      </motion.header>
 
       <section className="px-5 pt-4">
         {staff.length === 0 ? (
@@ -134,23 +137,32 @@ const ManagerTeam = () => {
           </div>
         ) : (
           <div className="grid gap-3">
-            {staff.map((s) => (
-              <motion.button
-                key={s.user_id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={() => navigate(`/manager/team/${s.user_id}`)}
-                className="flex items-center justify-between rounded-xl border bg-card p-4 text-left transition-all hover:shadow-md"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
-                    {s.name.charAt(0).toUpperCase()}
+            {staff.map((s, i) => {
+              const pct = s.total > 0 ? Math.round((s.completed / s.total) * 100) : 0;
+              return (
+                <motion.button
+                  key={s.user_id}
+                  custom={i}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => navigate(`/manager/team/${s.user_id}`)}
+                  className="glass-card flex items-center justify-between rounded-xl p-4 text-left transition-shadow hover:shadow-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                      {s.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <span className="font-medium">{s.name}</span>
+                      <p className="text-xs text-muted-foreground">{s.completed}/{s.total} modules</p>
+                    </div>
                   </div>
-                  <span className="font-medium">{s.name}</span>
-                </div>
-                <span className="text-sm text-muted-foreground">{s.completed}/{s.total}</span>
-              </motion.button>
-            ))}
+                  <span className={`text-sm font-semibold ${pct === 100 ? "text-success" : "text-primary"}`}>{pct}%</span>
+                </motion.button>
+              );
+            })}
           </div>
         )}
       </section>

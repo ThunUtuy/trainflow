@@ -114,3 +114,19 @@
     font-family: 'Fraunces', serif;
   }
 }
+
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-sm border border-border/50;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--card) / 0.8),
+      hsl(var(--card) / 0.6)
+    );
+  }
+
+  .glass-nav {
+    @apply backdrop-blur-md border-t border-border/50;
+    background: hsl(var(--card) / 0.85);
+  }
+}

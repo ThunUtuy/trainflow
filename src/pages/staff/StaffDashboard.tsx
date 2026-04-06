@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { BottomNav } from "@/components/BottomNav";
+import CircularProgress from "@/components/CircularProgress";
 import { motion } from "framer-motion";
 import { BookOpen, LogOut, KeyRound, CheckCircle2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Module {
   id: string;
@@ -19,6 +20,29 @@ interface QuizScore {
   score: number;
   total: number;
 }
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+const subtitles = [
+  "Let's keep the momentum going 💪",
+  "Ready to learn something new?",
+  "You're doing great — keep it up!",
+  "Time to level up your skills ✨",
+];
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.06, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 
 const StaffDashboard = () => {
   const navigate = useNavigate();
@@ -36,7 +60,6 @@ const StaffDashboard = () => {
       return;
     }
     const fetchData = async () => {
-      // Get modules from groups
       const [groupAssignRes, individualAssignRes] = await Promise.all([
         supabase.from("staff_playlist_assignments").select("playlist_id").eq("user_id", user.id),
         supabase.from("staff_module_assignments").select("module_id").eq("user_id", user.id),
@@ -44,7 +67,6 @@ const StaffDashboard = () => {
 
       const assignedModuleIds = new Set<string>();
 
-      // Modules from groups
       if (groupAssignRes.data && groupAssignRes.data.length > 0) {
         const playlistIds = groupAssignRes.data.map((a: any) => a.playlist_id);
         const { data: plMods } = await supabase
@@ -54,7 +76,6 @@ const StaffDashboard = () => {
         (plMods || []).forEach((pm: any) => assignedModuleIds.add(pm.module_id));
       }
 
-      // Individual module assignments
       (individualAssignRes.data || []).forEach((r: any) => assignedModuleIds.add(r.module_id));
 
       if (assignedModuleIds.size === 0) {
@@ -74,7 +95,6 @@ const StaffDashboard = () => {
       progRes.data?.forEach((p: any) => { map[p.module_id] = p.status; });
       setProgress(map);
 
-      // Get latest quiz score per module
       const scoreMap: Record<string, QuizScore> = {};
       (quizRes.data || []).forEach((a: any) => {
         const moduleId = a.quizzes?.module_id;
@@ -89,7 +109,22 @@ const StaffDashboard = () => {
   }, [hasEstablishment, user, profile]);
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
+    return (
+      <div className="min-h-screen pb-20">
+        <div className="px-5 pt-6 pb-2 space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-7 w-48" />
+        </div>
+        <div className="flex justify-center py-8">
+          <Skeleton className="h-28 w-28 rounded-full" />
+        </div>
+        <div className="px-5 space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (!hasEstablishment) {
@@ -108,26 +143,32 @@ const StaffDashboard = () => {
 
   const completed = modules.filter((m) => progress[m.id] === "completed").length;
   const overallPct = modules.length ? Math.round((completed / modules.length) * 100) : 0;
+  const subtitle = subtitles[Math.floor(Math.random() * subtitles.length)];
 
   return (
     <div className="min-h-screen pb-20 overflow-x-hidden">
-      <header className="flex items-center justify-between px-5 pt-6 pb-2">
+      <motion.header
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between px-5 pt-6 pb-2"
+      >
         <div>
-          <p className="text-sm text-muted-foreground">Welcome back,</p>
+          <p className="text-sm text-muted-foreground">{getGreeting()},</p>
           <h1 className="text-xl font-bold">{profile?.name || "Staff"}</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
         </div>
         <Button variant="ghost" size="icon" onClick={signOut}><LogOut className="h-5 w-5" /></Button>
-      </header>
+      </motion.header>
 
-      <div className="px-5 py-4">
-        <div className="rounded-xl bg-primary/10 p-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium">Overall progress</span>
-            <span className="text-primary font-semibold">{overallPct}%</span>
-          </div>
-          <Progress value={overallPct} className="mt-2 h-2" />
-        </div>
-      </div>
+      {/* Circular progress */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.15, duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+        className="flex justify-center py-6"
+      >
+        <CircularProgress value={overallPct} />
+      </motion.div>
 
       <section className="px-5">
         <h2 className="mb-3 text-lg font-semibold">Training modules</h2>
@@ -135,7 +176,7 @@ const StaffDashboard = () => {
           <p className="text-center text-muted-foreground py-8">No modules assigned to you yet. Ask your manager!</p>
         ) : (
           <div className="grid gap-3">
-            {modules.map((mod) => {
+            {modules.map((mod, i) => {
               const status = progress[mod.id] || "not_started";
               const score = quizScores[mod.id];
               const isCompleted = status === "completed";
@@ -143,14 +184,23 @@ const StaffDashboard = () => {
               return (
                 <motion.button
                   key={mod.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  custom={i}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => navigate(`/staff/modules/${mod.id}`)}
-                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all hover:shadow-md w-full ${isCompleted ? "border-green-500/30 bg-green-50/50 dark:bg-green-950/20" : "bg-card"}`}
+                  className={`glass-card flex items-start gap-3 rounded-xl p-4 text-left transition-shadow hover:shadow-lg w-full ${
+                    isCompleted
+                      ? "border-l-[3px] border-l-success"
+                      : isInProgress
+                      ? "border-l-[3px] border-l-primary"
+                      : ""
+                  }`}
                 >
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${isCompleted ? "bg-green-100 dark:bg-green-900/40" : "bg-primary/10"}`}>
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${isCompleted ? "bg-success/15" : "bg-primary/10"}`}>
                     {isCompleted ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      <CheckCircle2 className="h-5 w-5 text-success" />
                     ) : isInProgress ? (
                       <Clock className="h-5 w-5 text-primary" />
                     ) : (
@@ -161,7 +211,7 @@ const StaffDashboard = () => {
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-sm leading-snug">{mod.title}</p>
                       {isCompleted && (
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-0">
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-success/15 text-success border-0">
                           Done
                         </Badge>
                       )}
@@ -170,8 +220,8 @@ const StaffDashboard = () => {
                     {score && (
                       <p className={`text-xs font-medium mt-1 ${
                         Math.round((score.score / score.total) * 100) >= 70
-                          ? "text-green-600 dark:text-green-400"
-                          : "text-amber-600 dark:text-amber-400"
+                          ? "text-success"
+                          : "text-warning"
                       }`}>
                         Quiz: {score.score}/{score.total} ({Math.round((score.score / score.total) * 100)}%)
                         {Math.round((score.score / score.total) * 100) < 70 && " — Retry needed"}

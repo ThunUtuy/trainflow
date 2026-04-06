@@ -5,6 +5,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/BottomNav";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Plus, FolderOpen, Trash2 } from "lucide-react";
@@ -17,6 +18,14 @@ interface Group {
   module_count: number;
   staff_count: number;
 }
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.06, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 
 const ManagerGroups = () => {
   const navigate = useNavigate();
@@ -57,12 +66,27 @@ const ManagerGroups = () => {
   };
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
+    return (
+      <div className="min-h-screen pb-20">
+        <div className="px-5 pt-6 pb-2 space-y-2">
+          <Skeleton className="h-7 w-24" />
+          <Skeleton className="h-4 w-56" />
+        </div>
+        <div className="px-5 pt-4 space-y-3">
+          {[1, 2].map((i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
+        </div>
+        <BottomNav />
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen pb-20">
-      <header className="flex items-center justify-between px-5 pt-6 pb-2">
+      <motion.header
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between px-5 pt-6 pb-2"
+      >
         <div>
           <h1 className="text-xl font-bold">Roles</h1>
           <p className="text-sm text-muted-foreground">Group modules into training roles for your staff</p>
@@ -70,7 +94,7 @@ const ManagerGroups = () => {
         <Button size="sm" onClick={() => navigate("/manager/groups/create")}>
           <Plus className="mr-1 h-4 w-4" /> New
         </Button>
-      </header>
+      </motion.header>
 
       <section className="px-5 pt-4">
         {groups.length === 0 ? (
@@ -80,12 +104,14 @@ const ManagerGroups = () => {
           </div>
         ) : (
           <div className="grid gap-3">
-            {groups.map((g) => (
+            {groups.map((g, i) => (
               <motion.div
                 key={g.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between rounded-xl border bg-card p-4"
+                custom={i}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                className="glass-card flex items-center justify-between rounded-xl p-4 transition-shadow hover:shadow-lg"
               >
                 <button
                   onClick={() => navigate(`/manager/groups/${g.id}`)}
