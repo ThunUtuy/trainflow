@@ -43,63 +43,49 @@ const ManagerCreateRole = () => {
       for (let mi = 0; mi < template.modules.length; mi++) {
         const mod = template.modules[mi];
 
-        // Check if module with same title already exists in this establishment
-        const { data: existing } = await supabase
+        // Always create a fresh module from the template
+        const { data: newMod, error: modErr } = await supabase
           .from("modules")
+          .insert({
+            establishment_id: profile.establishment_id,
+            title: mod.title,
+            description: mod.description,
+            template_source: template.key,
+            sort_order: mi,
+          })
           .select("id")
-          .eq("establishment_id", profile.establishment_id)
-          .eq("title", mod.title)
-          .maybeSingle();
+          .single();
 
-        let moduleId: string;
+        if (modErr || !newMod) continue;
+        const moduleId = newMod.id;
 
-        if (existing) {
-          moduleId = existing.id;
-        } else {
-          // Create the module
-          const { data: newMod, error: modErr } = await supabase
-            .from("modules")
-            .insert({
-              establishment_id: profile.establishment_id,
-              title: mod.title,
-              description: mod.description,
-              template_source: template.key,
-              sort_order: mi,
-            })
-            .select("id")
-            .single();
+        // Create pages
+        const pages = mod.pages.map((p, i) => ({
+          module_id: moduleId,
+          type: p.type,
+          title: p.title,
+          content: p.content,
+          sort_order: i,
+        }));
+        await supabase.from("module_pages").insert(pages);
 
-          if (modErr || !newMod) continue;
-          moduleId = newMod.id;
+        // Create quiz
+        const { data: quiz } = await supabase
+          .from("quizzes")
+          .insert({ module_id: moduleId, title: mod.quiz.title })
+          .select("id")
+          .single();
 
-          // Create pages
-          const pages = mod.pages.map((p, i) => ({
-            module_id: moduleId,
-            type: p.type,
-            title: p.title,
-            content: p.content,
+        if (quiz) {
+          const questions = mod.quiz.questions.map((q, i) => ({
+            quiz_id: quiz.id,
+            question_text: q.question_text,
+            type: q.type,
+            options: q.options,
+            correct_answers: q.correct_answers,
             sort_order: i,
           }));
-          await supabase.from("module_pages").insert(pages);
-
-          // Create quiz
-          const { data: quiz } = await supabase
-            .from("quizzes")
-            .insert({ module_id: moduleId, title: mod.quiz.title })
-            .select("id")
-            .single();
-
-          if (quiz) {
-            const questions = mod.quiz.questions.map((q, i) => ({
-              quiz_id: quiz.id,
-              question_text: q.question_text,
-              type: q.type,
-              options: q.options,
-              correct_answers: q.correct_answers,
-              sort_order: i,
-            }));
-            await supabase.from("quiz_questions").insert(questions);
-          }
+          await supabase.from("quiz_questions").insert(questions);
         }
 
         // Link module to playlist
