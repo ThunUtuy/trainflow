@@ -61,6 +61,16 @@ const StaffDashboard = () => {
       return;
     }
     const fetchData = async () => {
+      // Fetch establishment name
+      if (profile?.establishment_id) {
+        const { data: estData } = await supabase
+          .from("establishments")
+          .select("name")
+          .eq("id", profile.establishment_id)
+          .single();
+        if (estData) setEstablishmentName(estData.name);
+      }
+
       const [groupAssignRes, individualAssignRes] = await Promise.all([
         supabase.from("staff_playlist_assignments").select("playlist_id").eq("user_id", user.id),
         supabase.from("staff_module_assignments").select("module_id").eq("user_id", user.id),
