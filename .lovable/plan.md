@@ -1,56 +1,54 @@
 
 
-# Add "Wow Factor" to TrainFlow
+# Multi-Restaurant Staff Membership
 
-Implementing 4 enhancement areas: animated dashboard, glassmorphism cards, celebration effects, polished bottom nav, and micro-interactions throughout.
+## Current state
+- Staff have a single `establishment_id` on their `profiles` row
+- The `get_user_establishment_id()` DB function returns this single value and is used in **all RLS policies** across every table
+- Dashboard checks `profile.establishment_id` to determine if staff has joined a team
 
----
+## Approach
 
-## 1. Animated Staff Dashboard
-**File: `StaffDashboard.tsx`**
-- Replace "Welcome back," with time-aware greeting ("Good morning/afternoon/evening, Name") and a motivational subtitle
-- Replace the flat `<Progress>` bar with an animated circular progress ring (new `CircularProgress` component using SVG with framer-motion animated stroke)
-- Add staggered entrance animations on module cards (50ms delay per card)
+### Database changes
 
-**New file: `src/components/CircularProgress.tsx`**
-- SVG-based ring with animated fill using framer-motion's `useMotionValue` + `useTransform`
-- Percentage displayed in center
+1. **New table: `staff_establishments`** -- maps staff to multiple restaurants
+   - `id` (uuid, PK), `user_id` (uuid, NOT NULL), `establishment_id` (uuid, NOT NULL), `joined_at` (timestamptz, default now())
+   - Unique constraint on `(user_id, establishment_id)`
+   - RLS: staff can read own rows; managers can read rows in their establishment
 
-## 2. Glassmorphism + Gradient Cards
-**Files: `StaffDashboard.tsx`, `ManagerTeam.tsx`, `ManagerGroups.tsx`**
-- Update module/staff/role cards with: subtle gradient backgrounds, `backdrop-blur-sm` glass effect, colored left-border accents (green=done, orange=in-progress, gray=not started)
-- Add `hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]` transitions
+2. **Keep `profiles.establishment_id`** as the "active/selected" establishment. This is critical because `get_user_establishment_id()` is used in dozens of RLS policies. Changing all those policies would be massive and risky. Instead, `profiles.establishment_id` becomes the **currently selected** restaurant, and we update it when the user switches.
 
-**File: `index.css`**
-- Add utility classes for glassmorphism (`glass-card`) and gradient backgrounds
+3. **Update `get_user_establishment_id()`** -- no change needed since it still reads from `profiles.establishment_id`, which now represents the active selection.
 
-## 3. Celebration Effects (Confetti)
-**Install: `canvas-confetti` (lightweight, no heavy Lottie needed)**
+### New page: `StaffSelectEstablishment.tsx`
 
-**Files: `MicrolearningComplete.tsx`, `StaffQuiz.tsx`**
-- Fire confetti burst on mount of the completion/pass screen
-- On quiz pass: confetti + success icon scale-in animation
-- On quiz fail: gentle shake animation instead
+- Route: `/staff/select-restaurant`
+- Fetches all establishments the user belongs to via `staff_establishments` joined with `establishments`
+- Shows each restaurant as a centered, clickable rectangle button (glass-card styled, stacked vertically)
+- Also shows a "Join another restaurant" button that navigates to `/staff/setup`
+- On click: updates `profiles.establishment_id` to the selected one, calls `refetch()`, navigates to `/staff/dashboard`
 
-## 4. Polished Bottom Navigation
-**File: `BottomNav.tsx`**
-- Add animated pill indicator using framer-motion `layoutId` that slides between active tabs
-- Active icon gets a subtle scale bounce (`whileTap={{ scale: 0.9 }}`)
-- Add glass-blur background to the nav bar itself
+### Flow changes
 
-## 5. Micro-interactions Everywhere
-**File: `tailwind.config.ts`** -- add keyframes for fade-in, scale-in, stagger
-**File: `App.tsx`** -- wrap route outlet with `AnimatePresence` for page transitions
-**All card buttons** -- `whileTap={{ scale: 0.97 }}` on interactive cards
-**Loading states** -- replace plain spinners with skeleton placeholders in dashboard and team pages
+- **`StaffDashboard.tsx`**: When staff has **no** entries in `staff_establishments` → show "No team yet" with invite code button (same as now)
+- **`StaffDashboard.tsx`**: When staff has **1+** entries → redirect to `/staff/select-restaurant` if no active establishment is set, otherwise show dashboard as normal
+- **`StaffSetup.tsx`** (invite code page): After claiming an invite code, also insert into `staff_establishments`. Still sets `profiles.establishment_id` to the new one.
+- **`BottomNav.tsx`**: Add a small restaurant-switcher icon or make the restaurant name in the header tappable to go back to selection
 
----
+### Files to create/modify
 
-## Technical Details
+| File | Change |
+|------|--------|
+| `supabase/migrations/...` | Create `staff_establishments` table with RLS |
+| `src/pages/staff/StaffSelectEstablishment.tsx` | New page -- restaurant picker |
+| `src/pages/staff/StaffDashboard.tsx` | Check `staff_establishments` count; redirect if needed; add "Switch restaurant" option |
+| `src/pages/staff/StaffSetup.tsx` | Also insert into `staff_establishments` on join |
+| `src/App.tsx` | Add route for `/staff/select-restaurant` |
+| `src/hooks/useAuth.tsx` | Profile type stays the same (still has `establishment_id` as active) |
 
-- **New dependency**: `canvas-confetti` (tiny, ~6KB)
-- **New component**: `src/components/CircularProgress.tsx`
-- **CSS additions**: glassmorphism utilities in `index.css`
-- **Files modified**: `StaffDashboard.tsx`, `ManagerTeam.tsx`, `ManagerGroups.tsx`, `BottomNav.tsx`, `MicrolearningComplete.tsx`, `StaffQuiz.tsx`, `App.tsx`, `tailwind.config.ts`, `index.css`
-- **No database changes needed**
+### Technical details
+
+- The `staff_establishments` table avoids changing any existing RLS policies. The `profiles.establishment_id` field acts as a "session pointer" to the active restaurant.
+- When switching restaurants, a single `UPDATE profiles SET establishment_id = X` call is made, then `refetch()` refreshes the auth context, and the dashboard reloads data for the new establishment.
+- Migration SQL will include INSERT RLS so staff can add themselves, and SELECT so they can list their own memberships.
 
