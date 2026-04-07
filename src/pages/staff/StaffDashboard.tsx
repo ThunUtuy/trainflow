@@ -164,6 +164,9 @@ const StaffDashboard = () => {
         className="flex items-center justify-between px-5 pt-6 pb-2"
       >
         <div>
+          {establishmentName && (
+            <p className="text-sm font-semibold text-primary mb-0.5">{establishmentName}</p>
+          )}
           <p className="text-sm text-muted-foreground">{getGreeting()},</p>
           <h1 className="text-xl font-bold">{profile?.name || "Staff"}</h1>
           <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
