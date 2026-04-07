@@ -24,6 +24,7 @@ import ManagerModules from "./pages/manager/ManagerModules";
 import ManagerCreateModule from "./pages/manager/ManagerCreateModule";
 import ManagerModuleEdit from "./pages/manager/ManagerModuleEdit";
 import ManagerInvite from "./pages/manager/ManagerInvite";
+import ManagerSettings from "./pages/manager/ManagerSettings";
 import ManagerGroups from "./pages/manager/ManagerGroups";
 import ManagerCreateRole from "./pages/manager/ManagerCreateRole";
 import ManagerGroupDetail from "./pages/manager/ManagerGroupDetail";
@@ -71,6 +72,7 @@ function AppRoutes() {
       <Route path="/manager/groups/create" element={<RoleGuard role="manager"><ManagerCreateRole /></RoleGuard>} />
       <Route path="/manager/groups/:id" element={<RoleGuard role="manager"><ManagerGroupDetail /></RoleGuard>} />
       <Route path="/manager/invite" element={<RoleGuard role="manager"><ManagerInvite /></RoleGuard>} />
+      <Route path="/manager/settings" element={<RoleGuard role="manager"><ManagerSettings /></RoleGuard>} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -15,7 +15,7 @@ export function BottomNav() {
     ? [
         { icon: Users, label: "Team", path: "/manager/team" },
         { icon: FolderOpen, label: "Roles", path: "/manager/groups" },
-        { icon: Settings, label: "Settings", path: "/manager/invite" },
+        { icon: Settings, label: "Settings", path: "/manager/settings" },
       ]
     : [
         { icon: BookOpen, label: "Modules", path: "/staff/dashboard" },
