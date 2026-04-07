@@ -50,6 +50,7 @@ const StaffDashboard = () => {
   const [modules, setModules] = useState<Module[]>([]);
   const [progress, setProgress] = useState<Record<string, string>>({});
   const [quizScores, setQuizScores] = useState<Record<string, QuizScore>>({});
+  const [establishmentName, setEstablishmentName] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   const hasEstablishment = !!profile?.establishment_id;
