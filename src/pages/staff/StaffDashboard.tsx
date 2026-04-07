@@ -16,6 +16,12 @@ interface Module {
   description: string;
 }
 
+interface EstablishmentInfo {
+  name: string;
+  description: string | null;
+  image_url: string | null;
+}
+
 interface QuizScore {
   score: number;
   total: number;
@@ -51,6 +57,7 @@ const StaffDashboard = () => {
   const [progress, setProgress] = useState<Record<string, string>>({});
   const [quizScores, setQuizScores] = useState<Record<string, QuizScore>>({});
   const [establishmentName, setEstablishmentName] = useState<string>("");
+  const [establishmentInfo, setEstablishmentInfo] = useState<EstablishmentInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
   const hasEstablishment = !!profile?.establishment_id;
@@ -80,10 +87,13 @@ const StaffDashboard = () => {
       if (profile?.establishment_id) {
         const { data: estData } = await supabase
           .from("establishments")
-          .select("name")
+          .select("name, description, image_url")
           .eq("id", profile.establishment_id)
           .single();
-        if (estData) setEstablishmentName(estData.name);
+        if (estData) {
+          setEstablishmentName(estData.name);
+          setEstablishmentInfo(estData);
+        }
       }
 
       const [groupAssignRes, individualAssignRes] = await Promise.all([
@@ -198,6 +208,27 @@ const StaffDashboard = () => {
         </div>
         <Button variant="ghost" size="icon" onClick={signOut}><LogOut className="h-5 w-5" /></Button>
       </motion.header>
+
+      {/* About us card */}
+      {establishmentInfo && (establishmentInfo.description || establishmentInfo.image_url) && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="mx-5 mb-2 glass-card rounded-xl p-4 flex gap-3 items-start"
+        >
+          {establishmentInfo.image_url && (
+            <img
+              src={establishmentInfo.image_url}
+              alt={establishmentName}
+              className="h-16 w-16 rounded-lg object-cover shrink-0"
+            />
+          )}
+          {establishmentInfo.description && (
+            <p className="text-sm text-muted-foreground leading-relaxed">{establishmentInfo.description}</p>
+          )}
+        </motion.div>
+      )}
 
       {/* Circular progress */}
       <motion.div
