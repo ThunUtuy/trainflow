@@ -310,6 +310,35 @@ export type Database = {
           },
         ]
       }
+      staff_establishments: {
+        Row: {
+          establishment_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          establishment_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          establishment_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_establishments_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_module_assignments: {
         Row: {
           assigned_at: string

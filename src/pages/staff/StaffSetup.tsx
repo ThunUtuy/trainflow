@@ -34,14 +34,15 @@ const StaffSetup = () => {
       return;
     }
 
-    // Claim invite code & update profile
-    const [claimRes, profileRes] = await Promise.all([
+    // Claim invite code, update profile, and add to staff_establishments
+    const [claimRes, profileRes, membershipRes] = await Promise.all([
       supabase.from("invite_codes").update({ used_by: user.id, used_at: new Date().toISOString() }).eq("id", invite.id),
       supabase.from("profiles").update({ establishment_id: invite.establishment_id }).eq("user_id", user.id),
+      supabase.from("staff_establishments").insert({ user_id: user.id, establishment_id: invite.establishment_id }),
     ]);
 
     setLoading(false);
-    if (claimRes.error || profileRes.error) {
+    if (claimRes.error || profileRes.error || membershipRes.error) {
       toast({ title: "Failed to join. Try again.", variant: "destructive" });
     } else {
       toast({ title: "You're in! 🎉" });
