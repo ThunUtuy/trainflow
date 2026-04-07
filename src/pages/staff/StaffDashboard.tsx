@@ -234,6 +234,25 @@ const StaffDashboard = () => {
           </div>
         )}
       </section>
+
+      {/* Reset progress — for testing */}
+      <div className="px-5 pb-28 pt-6">
+        <button
+          onClick={async () => {
+            if (!user) return;
+            const ok = window.confirm("Reset ALL your training progress and quiz attempts? This cannot be undone.");
+            if (!ok) return;
+            await Promise.all([
+              supabase.from("staff_module_progress").delete().eq("user_id", user.id),
+              supabase.from("staff_quiz_attempts").delete().eq("user_id", user.id),
+            ]);
+            window.location.reload();
+          }}
+          className="w-full text-xs text-muted-foreground/60 hover:text-destructive transition-colors py-2"
+        >
+          Reset all progress
+        </button>
+      </div>
       <BottomNav />
     </div>
   );
