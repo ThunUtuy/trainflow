@@ -50,6 +50,7 @@ const StaffDashboard = () => {
   const [modules, setModules] = useState<Module[]>([]);
   const [progress, setProgress] = useState<Record<string, string>>({});
   const [quizScores, setQuizScores] = useState<Record<string, QuizScore>>({});
+  const [establishmentName, setEstablishmentName] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   const hasEstablishment = !!profile?.establishment_id;
@@ -60,6 +61,16 @@ const StaffDashboard = () => {
       return;
     }
     const fetchData = async () => {
+      // Fetch establishment name
+      if (profile?.establishment_id) {
+        const { data: estData } = await supabase
+          .from("establishments")
+          .select("name")
+          .eq("id", profile.establishment_id)
+          .single();
+        if (estData) setEstablishmentName(estData.name);
+      }
+
       const [groupAssignRes, individualAssignRes] = await Promise.all([
         supabase.from("staff_playlist_assignments").select("playlist_id").eq("user_id", user.id),
         supabase.from("staff_module_assignments").select("module_id").eq("user_id", user.id),
@@ -153,6 +164,9 @@ const StaffDashboard = () => {
         className="flex items-center justify-between px-5 pt-6 pb-2"
       >
         <div>
+          {establishmentName && (
+            <p className="text-sm font-semibold text-primary mb-0.5">{establishmentName}</p>
+          )}
           <p className="text-sm text-muted-foreground">{getGreeting()},</p>
           <h1 className="text-xl font-bold">{profile?.name || "Staff"}</h1>
           <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
