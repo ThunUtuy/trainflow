@@ -14,6 +14,7 @@ import ResetPassword from "./pages/ResetPassword";
 import AssignRole from "./pages/AssignRole";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffSetup from "./pages/staff/StaffSetup";
+import StaffSelectEstablishment from "./pages/staff/StaffSelectEstablishment";
 import StaffModuleDetail from "./pages/staff/StaffModuleDetail";
 import StaffQuiz from "./pages/staff/StaffQuiz";
 import ManagerTeam from "./pages/manager/ManagerTeam";
@@ -55,6 +56,7 @@ function AppRoutes() {
       {/* Staff routes */}
       <Route path="/staff/dashboard" element={<RoleGuard role="staff"><StaffDashboard /></RoleGuard>} />
       <Route path="/staff/setup" element={<RoleGuard role="staff"><StaffSetup /></RoleGuard>} />
+      <Route path="/staff/select-restaurant" element={<RoleGuard role="staff"><StaffSelectEstablishment /></RoleGuard>} />
       <Route path="/staff/modules/:id" element={<RoleGuard role="staff"><StaffModuleDetail /></RoleGuard>} />
       <Route path="/staff/modules/:id/quiz" element={<RoleGuard role="staff"><StaffQuiz /></RoleGuard>} />
 

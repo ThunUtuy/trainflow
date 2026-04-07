@@ -54,9 +54,24 @@ const StaffDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const hasEstablishment = !!profile?.establishment_id;
+  const [membershipCount, setMembershipCount] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!hasEstablishment || !user) {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    // Check how many restaurants this staff belongs to
+    const checkMemberships = async () => {
+      const { count } = await supabase
+        .from("staff_establishments")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      setMembershipCount(count ?? 0);
+    };
+    checkMemberships();
+
+    if (!hasEstablishment) {
       setLoading(false);
       return;
     }
@@ -139,6 +154,11 @@ const StaffDashboard = () => {
   }
 
   if (!hasEstablishment) {
+    // If they have memberships but no active one, redirect to selector
+    if (membershipCount && membershipCount > 0) {
+      navigate("/staff/select-restaurant", { replace: true });
+      return null;
+    }
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm space-y-5 text-center">
@@ -165,7 +185,12 @@ const StaffDashboard = () => {
       >
         <div>
           {establishmentName && (
-            <p className="text-sm font-semibold text-primary mb-0.5">{establishmentName}</p>
+            <button
+              onClick={() => navigate("/staff/select-restaurant")}
+              className="text-sm font-semibold text-primary mb-0.5 hover:underline cursor-pointer"
+            >
+              {establishmentName} ↗
+            </button>
           )}
           <p className="text-sm text-muted-foreground">{getGreeting()},</p>
           <h1 className="text-xl font-bold">{profile?.name || "Staff"}</h1>
