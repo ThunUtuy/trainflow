@@ -58,6 +58,7 @@ const StaffDashboard = () => {
   const [quizScores, setQuizScores] = useState<Record<string, QuizScore>>({});
   const [establishmentName, setEstablishmentName] = useState<string>("");
   const [establishmentInfo, setEstablishmentInfo] = useState<EstablishmentInfo | null>(null);
+  const [trainingRoles, setTrainingRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const hasEstablishment = !!profile?.establishment_id;
@@ -105,11 +106,14 @@ const StaffDashboard = () => {
 
       if (groupAssignRes.data && groupAssignRes.data.length > 0) {
         const playlistIds = groupAssignRes.data.map((a: any) => a.playlist_id);
-        const { data: plMods } = await supabase
-          .from("playlist_modules")
-          .select("module_id")
-          .in("playlist_id", playlistIds);
-        (plMods || []).forEach((pm: any) => assignedModuleIds.add(pm.module_id));
+        const [plModsRes, plNamesRes] = await Promise.all([
+          supabase.from("playlist_modules").select("module_id").in("playlist_id", playlistIds),
+          supabase.from("playlists").select("name").in("id", playlistIds),
+        ]);
+        (plModsRes.data || []).forEach((pm: any) => assignedModuleIds.add(pm.module_id));
+        setTrainingRoles((plNamesRes.data || []).map((p: any) => p.name));
+      } else {
+        setTrainingRoles([]);
       }
 
       (individualAssignRes.data || []).forEach((r: any) => assignedModuleIds.add(r.module_id));
@@ -227,6 +231,25 @@ const StaffDashboard = () => {
           {establishmentInfo.description && (
             <p className="text-sm text-muted-foreground leading-relaxed">{establishmentInfo.description}</p>
           )}
+        </motion.div>
+      )}
+
+      {/* Your Role */}
+      {trainingRoles.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.4 }}
+          className="mx-5 mb-2"
+        >
+          <p className="text-xs font-medium text-muted-foreground mb-1.5">Your role</p>
+          <div className="flex flex-wrap gap-1.5">
+            {trainingRoles.map((role) => (
+              <Badge key={role} variant="secondary" className="text-xs">
+                {role}
+              </Badge>
+            ))}
+          </div>
         </motion.div>
       )}
 

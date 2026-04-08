@@ -5,6 +5,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/BottomNav";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Users, Building2, LogOut } from "lucide-react";
 
@@ -13,6 +14,7 @@ interface StaffMember {
   name: string;
   completed: number;
   total: number;
+  roles: string[];
 }
 
 const cardVariants = {
@@ -62,9 +64,14 @@ const ManagerTeam = () => {
           (directAssignRes.data || []).forEach((r: any) => assignedModuleIds.add(r.module_id));
 
           const playlistIds = (playlistAssignRes.data || []).map((r: any) => r.playlist_id);
+          let roleNames: string[] = [];
           if (playlistIds.length > 0) {
-            const { data: plModData } = await supabase.from("playlist_modules").select("module_id").in("playlist_id", playlistIds);
-            (plModData || []).forEach((r: any) => assignedModuleIds.add(r.module_id));
+            const [plModRes, plNameRes] = await Promise.all([
+              supabase.from("playlist_modules").select("module_id").in("playlist_id", playlistIds),
+              supabase.from("playlists").select("name").in("id", playlistIds),
+            ]);
+            (plModRes.data || []).forEach((r: any) => assignedModuleIds.add(r.module_id));
+            roleNames = (plNameRes.data || []).map((p: any) => p.name);
           }
 
           const totalAssigned = assignedModuleIds.size;
@@ -75,7 +82,7 @@ const ManagerTeam = () => {
             completedCount = (progData || []).filter((p: any) => assignedModuleIds.has(p.module_id)).length;
           }
 
-          staffWithRoles.push({ user_id: sp.user_id, name: sp.name, completed: completedCount, total: totalAssigned });
+          staffWithRoles.push({ user_id: sp.user_id, name: sp.name, completed: completedCount, total: totalAssigned, roles: roleNames });
         }
       }
 
@@ -156,6 +163,15 @@ const ManagerTeam = () => {
                     </div>
                     <div>
                       <span className="font-medium">{s.name}</span>
+                      {s.roles.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          {s.roles.map((role) => (
+                            <Badge key={role} variant="secondary" className="text-[10px] px-1.5 py-0">
+                              {role}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                       <p className="text-xs text-muted-foreground">{s.completed}/{s.total} modules</p>
                     </div>
                   </div>
