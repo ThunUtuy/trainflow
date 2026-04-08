@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle2, Circle, XCircle, FolderOpen, BookOpen, UserMinus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -202,6 +203,15 @@ const ManagerStaffDetail = () => {
       </div>
 
       <h1 className="text-2xl font-bold mb-1">{staffName}</h1>
+      {groups.filter((g) => g.assigned).length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          {groups.filter((g) => g.assigned).map((g) => (
+            <Badge key={g.id} variant="secondary" className="text-xs cursor-pointer hover:bg-secondary/60">
+              {g.name}
+            </Badge>
+          ))}
+        </div>
+      )}
 
       <Tabs defaultValue="progress" className="mt-4">
         <TabsList className="w-full mb-4">
