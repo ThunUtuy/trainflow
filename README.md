@@ -34,8 +34,11 @@ Create a `.env` file in the project root and add the required Supabase values:
 
 ```env
 VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+VITE_SUPABASE_PROJECT_ID=your_supabase_project_id
 ```
+
+These are publishable client-side values (safe to expose). Server-side secrets (e.g. `SUPABASE_SERVICE_ROLE_KEY`, `LOVABLE_API_KEY`) are configured separately as Edge Function secrets — never put them in `.env`.
 
 If you are using Supabase Edge Functions or storage features, make sure the linked Supabase project is set up with the expected schema, buckets, and policies.
 
